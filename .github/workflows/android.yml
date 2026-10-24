@@ -1,0 +1,71 @@
+name: Android APK
+
+on:
+  push:
+    branches: [main]
+    paths: ['android/**', 'port/**', '.github/workflows/android.yml']
+  pull_request:
+    paths: ['android/**', 'port/**', '.github/workflows/android.yml']
+  workflow_dispatch:
+
+env:
+  SDL_VERSION: '2.30.9'
+  NDK_VERSION: '26.3.11579264'
+
+jobs:
+  touch-tests:
+    name: Touch layout unit tests (Linux)
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: android
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and run tests
+        run: |
+          gcc -std=c99 -Wall -Wextra -pedantic -Werror -c app/src/main/cpp/touch_layout.c -o /dev/null
+          gcc -std=c99 -Wall -Wextra -Werror -Iapp/src/main/cpp -o test_touch_layout tests/test_touch_layout.c app/src/main/cpp/touch_layout.c
+          ./test_touch_layout
+
+  build-apk:
+    name: Build debug APK
+    needs: touch-tests
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: android
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Install NDK
+        run: |
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "ndk;${NDK_VERSION}" "cmake;3.22.1" "platforms;android-34" "build-tools;34.0.0"
+
+      - name: Fetch SDL2 ${{ env.SDL_VERSION }}
+        run: |
+          curl -fsSL "https://github.com/libsdl-org/SDL/archive/refs/tags/release-${SDL_VERSION}.tar.gz" -o sdl.tar.gz
+          tar -xzf sdl.tar.gz
+          mv "SDL-release-${SDL_VERSION}" app/src/main/cpp/SDL
+          # SDL's Java glue is what SDLActivity needs at runtime
+          mkdir -p app/src/main/java/org/libsdl/app
+          cp app/src/main/cpp/SDL/android-project/app/src/main/java/org/libsdl/app/*.java app/src/main/java/org/libsdl/app/
+
+      - name: Build debug APK
+        run: |
+          export ANDROID_NDK_HOME="$ANDROID_HOME/ndk/$NDK_VERSION"
+          gradle --no-daemon assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Goldeneye007-debug
+          path: android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
