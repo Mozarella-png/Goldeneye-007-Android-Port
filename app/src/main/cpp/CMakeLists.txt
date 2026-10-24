@@ -17,9 +17,9 @@ add_subdirectory(SDL)
 # listed in the root CMakeLists.txt as SRC_GAME / SRC_ENGINE / SRC_LIBULTRA*.
 # They must be exported to a shared include so both builds use one list.
 # Until then this target only compiles the layers below.
-file(GLOB PORT_C   "${CMAKE_CURRENT_SOURCE_DIR}/../../../../../port/src/*.c")
-file(GLOB PORT_CXX "${CMAKE_CURRENT_SOURCE_DIR}/../../../../../port/src/*.cpp"
-                   "${CMAKE_CURRENT_SOURCE_DIR}/../../../../../port/fast3d/*.cpp")
+file(GLOB PORT_C   "${CMAKE_CURRENT_SOURCE_DIR}/../../../../port/src/*.c")
+file(GLOB PORT_CXX "${CMAKE_CURRENT_SOURCE_DIR}/../../../../port/src/*.cpp"
+                   "${CMAKE_CURRENT_SOURCE_DIR}/../../../../port/fast3d/*.cpp")
 
 add_library(main SHARED
     ${CMAKE_CURRENT_SOURCE_DIR}/touch_layout.c
@@ -30,9 +30,9 @@ add_library(main SHARED
 
 target_include_directories(main PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../port/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../port/fast3d
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../../../port/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../../../port/fast3d
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../../../include
 )
 
 # OpenGL ES 3 instead of desktop GL (see docs/android.md: the renderer still needs

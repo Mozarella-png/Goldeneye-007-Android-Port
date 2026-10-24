@@ -1,6 +1,6 @@
 # Goldeneye 007 — Android (en progreso)
 
-Estado honesto de este directorio. Colocar en la raíz del repo como `android/`.
+Estado honesto del proyecto. Este contenido va en la raíz del repo (no dentro de una carpeta `android/`).
 
 ## Verificado
 - `touch/` (layout de controles táctiles): lógica pura en C, con tests que pasan
@@ -26,4 +26,4 @@ Estado honesto de este directorio. Colocar en la raíz del repo como `android/`.
    y que el aspect ratio de la ventana sea el usado por el widescreen nativo.
 
 ## Build local (cuando esté el NDK)
-    cd android && gradle assembleDebug
+    gradle assembleDebug
