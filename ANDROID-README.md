@@ -90,10 +90,32 @@ Riesgo que no se puede verificar desde aquí: que `0x40000000` esté libre en el
 
 Para el crash en sí: el log no tiene símbolos. Con `PC=0x77e4439d20` y `MODULE=0x77e42f2000`, el offset dentro del módulo es `0x147D20`. Si el módulo es `libmain.so` sin stripear, `addr2line -e libmain.so 0x147d20` o `ndk-stack` dan la función. Conviene volver a mirarlo después de este arreglo, porque puede desaparecer con la causa.
 
+## Segundo log (2026-10-25, tras el cambio a 0x40000000)
+
+Confirmado:
+
+- `ROM mapped at 0x40000000 (12582912 bytes)`, con los sidecars en `0x40C00000` y `0x40D42560`. El mapeo ya funciona.
+- La ROM es completa para los assets: los archivos del CSV llegan a unos 9 MB dentro de los 12 MB.
+- Los dos fallos de GL que quedan son los nombres de escritorio esperados en GLES, ya informativos.
+
+Sigue fallando:
+
+- Las lecturas DMA usan fuentes que no están en el mapa del cart, por ejemplo `src=0x239E8250`. Esas fuentes no siguen el cambio de base, así que no son offsets de la ROM. Las direcciones bajas coinciden entre ejecuciones (`…250`, `…F20`, `…A10`) mientras cambian los bits altos. Eso se parece a punteros de memoria del host truncados a 32 bits en algún `hw_address` de la tabla de archivos.
+- Por eso el audio falla después (`bad bank revision 0x0000`): el bank se lee de una fuente mala.
+
+Lo que se añade para localizarlo:
+
+- `pcmodelsReportBadTableEntries()` (en `port/src/pcmodels.c`) se ejecuta después de parchear la tabla. Recorre `file_resource_table` y registra cada `hw_address` que no cae dentro del mapa del cart, con el nombre del archivo. Al arrancar sale una línea `table: entry N 'nombre' hw_address=0x… is outside the cart map` por cada entrada mala, o `table: all hw_address entries are inside the cart map`.
+
+Qué buscar en el próximo log:
+
+- Si aparecen entradas malas, el nombre dice qué asset se carga mal y de dónde viene. Ahí está el origen del puntero.
+- Si la tabla sale limpia, el puntero malo lo calcula el juego en tiempo de ejecución. En ese caso hay que sacar el caller del DMA, con la pila que ya registra `piServiceDma` para destinos inválidos, y resolverlo con `addr2line` sobre `libmain.so` sin stripear.
+
 ## Pendientes, en orden
 
-1. Probar el build nuevo en el Poco: confirmar `ROM mapped at 0x40000000` y que el juego llega a cargar niveles.
-2. Si vuelve a crashear, símbolos del crash (ver arriba) y el log completo.
+1. Probar en el Poco y buscar en el log las líneas `table: …`. Si hay entradas malas, es el origen del puntero; si no, el caller del DMA (ver arriba).
+2. Símbolos del crash con `addr2line` sobre `libmain.so` sin stripear (offset `PC - MODULE`).
 3. Ver el log de `build-port-apk` si el build NDK falla (no se pudo compilar el NDK aquí).
 4. Etiquetas en los botones (texturas PNG), modo de edición y guardado del layout.
 5. Botón de gadget, agacharse y acceso a opciones desde táctil.

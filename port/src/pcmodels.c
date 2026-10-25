@@ -31,6 +31,7 @@ extern int   snprintf(char *str, size_t maxsize, const char *format, ...);
 #include "system.h"
 #include "fs.h"
 #include "pcmodels.h"
+#include "romdata.h"
 
 /* Order matters: <ultra64.h> must finish first — its PR/ucode.h anchor pulls
  * in pc_protos.h, which itself includes game/ob.h. Including ob.h before
@@ -203,6 +204,35 @@ int pcmodelsLoadSidecars(uintptr_t cartBase, uint32_t romSize)
     return 1;
 }
 
+/* Startup check: every file_resource_table hw_address must be NULL or a cart
+ * address inside the mapped image (ROM + sidecars). ob.c subtracts neighbouring
+ * entries and romCopy()s from hw_address, so a wrong entry turns into a DMA
+ * from garbage later. Name the entries here, at boot, instead. */
+void pcmodelsReportBadTableEntries(void)
+{
+    int bad = 0;
+    for (int t = 1; t < file_entry_max; t++) {
+        const u8 *p = (const u8 *)file_resource_table[t].hw_address;
+        if (!p)
+            continue;
+        u32 a = (u32)(uintptr_t)p;
+        if (romdataCartAddrValid(a, 1))
+            continue;
+        if (bad < 16) {
+            sysLogPrintf(LOG_ERROR,
+                         "table: entry %d '%s' hw_address=0x%08X is outside the cart map",
+                         t,
+                         file_resource_table[t].filename ? file_resource_table[t].filename : "?",
+                         a);
+        }
+        bad++;
+    }
+    if (bad)
+        sysLogPrintf(LOG_ERROR, "table: %d entries point outside the cart map", bad);
+    else
+        sysLogPrintf(LOG_INFO, "table: all hw_address entries are inside the cart map");
+}
+
 void pcmodelsPatchTable(void)
 {
     int i, t, hit;
@@ -232,6 +262,8 @@ void pcmodelsPatchTable(void)
     else
         sysLogPrintf(LOG_INFO, "pcmodels: table patched (%d model entries)",
                      hit);
+
+    pcmodelsReportBadTableEntries();
 }
 
 uint32_t pcmodelsTotalSize(void)
