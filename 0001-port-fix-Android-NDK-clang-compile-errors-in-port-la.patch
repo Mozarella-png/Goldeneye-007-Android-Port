@@ -1,0 +1,138 @@
+From e22071607ce442459872fb59f4375209a7862eb3 Mon Sep 17 00:00:00 2001
+From: "Claude Haiku 5.5" <noreply@anthropic.com>
+Date: Sat, 24 Oct 2026 21:49:56 -0400
+Subject: [PATCH] port: fix Android NDK (clang) compile errors in port layer
+
+The CI build-port-apk log (NDK 26, clang) showed 15 failing objects.
+Fix the port-layer causes without touching src/game:
+
+- pc_protos.h: skip ntohs/ntohl and memcpy/strcat/strcpy/strlen/strncpy
+  prototypes on __ANDROID__; bionic declares them itself (sys/endian.h
+  and overloadable string.h). Conflicting types / overloadable errors.
+- crash.c: <execinfo.h> is glibc-only. On Android provide no-op
+  backtrace/backtrace_symbols stubs (crash traces unavailable there;
+  all callers already handle nframes == 0 / NULL).
+- video.c: forward-declare portCrosshairTint before its first use.
+- libultra.c: declare geEepImportEmulatorSave before its first use.
+- drawdistgameplay.c: declare getROOMID_isNeighborToRendered (defined
+  in src/game/bg.c; no header prototypes it).
+
+Host check: all port/ sources pass gcc -fsyntax-only with
+-D__ANDROID__ (SDL Android config). Not verified against bionic/NDK;
+the CI build-port-apk job is the real check.
+
+Co-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01UFm6DPnprENSMSuMc7cS2h
+---
+ port/include/pc_protos.h    | 13 ++++++++++++-
+ port/src/crash.c            |  6 ++++++
+ port/src/drawdistgameplay.c |  3 +++
+ port/src/libultra.c         |  2 ++
+ port/src/video.c            |  2 ++
+ 5 files changed, 25 insertions(+), 1 deletion(-)
+
+diff --git a/port/include/pc_protos.h b/port/include/pc_protos.h
+index 614ca5a..1364f9e 100644
+--- a/port/include/pc_protos.h
++++ b/port/include/pc_protos.h
+@@ -51,7 +51,8 @@ void assert();
+  * winsock has not already declared them, so TUs that include <windows.h>
+  * before <ultra64.h> don't get a dllimport redeclaration warning. Defined in
+  * port/src/pc_netorder.c (little-endian byte swap == CharArrayTo16/32). */
+-#if !defined(__WINSOCK_H) && !defined(_WINSOCK2_H)
++/* Android (bionic) declares ntohs/ntohl itself in sys/endian.h. */
++#if !defined(__WINSOCK_H) && !defined(_WINSOCK2_H) && !defined(__ANDROID__)
+ /* Match winsock's own signatures (u_short/u_long) so TUs that parse
+  * <windows.h> later redeclare compatibly; on LLP64 u_long is 64-bit and the
+  * high bits are unused for the 16/32-bit values game code passes. */
+@@ -329,7 +330,9 @@ void * memaAlloc();
+ void memaFree();
+ s32 memaGetLongestFree();
+ int memcmp();
++#ifndef __ANDROID__ /* bionic's <string.h> declares these (overloadable) */
+ void * memcpy();
++#endif
+ u32 modelFindNextProjectileHitCandidate();
+ void modelGetXYExtents();
+ s32 modelLoad();
+@@ -412,11 +415,19 @@ bool stanTileHasZeroArea();
+ void stop_recording_ramrom();
+ void store_favorite_weapon_current_player();
+ void store_osgetcount();
++#ifndef __ANDROID__
+ char * strcat();
++#endif
+ int strcmp();
++#ifndef __ANDROID__
+ char * strcpy();
++#endif
++#ifndef __ANDROID__
+ size_t strlen();
++#endif
++#ifndef __ANDROID__
+ char * strncpy();
++#endif
+ long int strtol();
+ void sub_GAME_7F008DE4();
+ s32 sub_GAME_7F03DB70();
+diff --git a/port/src/crash.c b/port/src/crash.c
+index 642313a..1516817 100644
+--- a/port/src/crash.c
++++ b/port/src/crash.c
+@@ -351,7 +351,13 @@ static LONG __stdcall crashHandler(PEXCEPTION_POINTERS exinfo)
+ 
+ #include <ucontext.h>
+ #include <signal.h>
++#if defined(__ANDROID__)
++/* bionic has no <execinfo.h>: symbolized crash traces are unavailable on Android. */
++static int backtrace(void **buf, int size) { (void)buf; (void)size; return 0; }
++static char **backtrace_symbols(void *const *buf, int size) { (void)buf; (void)size; return NULL; }
++#else
+ #include <execinfo.h>
++#endif
+ #include <unistd.h>
+ #include <ctype.h>
+ #include <dlfcn.h>
+diff --git a/port/src/drawdistgameplay.c b/port/src/drawdistgameplay.c
+index 636e901..f35a2a4 100644
+--- a/port/src/drawdistgameplay.c
++++ b/port/src/drawdistgameplay.c
+@@ -24,6 +24,9 @@
+ #include "port_math.h"
+ #include "drawdistgameplay.h"
+ 
++/* Defined in src/game/bg.c (game file, left untouched); no header declares it. */
++extern u8 getROOMID_isNeighborToRendered(s32 roomID);
++
+ extern f32 portDrawDistanceMultiplier(void);
+ 
+ static u8 s_authRendered[MAXROOMCOUNT];
+diff --git a/port/src/libultra.c b/port/src/libultra.c
+index 4e9869c..debb51b 100644
+--- a/port/src/libultra.c
++++ b/port/src/libultra.c
+@@ -1103,6 +1103,8 @@ s32 osContReset(OSMesgQueue *mq, OSContStatus *status)
+ static u8   s_eeprom[GE_EEP_SIZE];
+ static int  s_eepromLoaded = 0;
+ 
++extern int geEepImportEmulatorSave(const char *path); /* port/src/eepimport.c (D514) */
++
+ static void geEepromLoad(void)
+ {
+     if (s_eepromLoaded) return;
+diff --git a/port/src/video.c b/port/src/video.c
+index ae19710..c3eb0a8 100644
+--- a/port/src/video.c
++++ b/port/src/video.c
+@@ -149,6 +149,8 @@ float portCrosshairScale(void) { return cfgCrosshairSize / 100.0f; }
+  * The call site points at display_image_at_position's env-color command;
+  * its immediately following command is the combine mode. Original/0
+  * skips this rewrite, keeping the original game's DL byte-identical. */
++void portCrosshairTint(s32 *r, s32 *g, s32 *b);
++
+ void portCrosshairApplyTintCombine(Gfx *envCommand)
+ {
+     if (!envCommand) return;
+-- 
+2.43.0
+
