@@ -119,6 +119,15 @@ jobs:
           "$NINJA" -k 0 -C "$BUILD_DIR" > build-port-full.log 2>&1 || true
           echo "failed objects: $(grep -c '^FAILED:' build-port-full.log || true)"
 
+      - name: Upload unstripped native libs (for crash symbolization)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: port-native-symbols
+          path: app/build/intermediates/cxx/Debug/*/obj/*/*.so
+          if-no-files-found: warn
+          retention-days: 14
+
       - name: Upload build log
         if: always()
         uses: actions/upload-artifact@v4
