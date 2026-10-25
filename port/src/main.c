@@ -297,6 +297,13 @@ int SDL_main(int argc, char **argv)
     const char *base = SDL_AndroidGetExternalStoragePath();
     if (base && chdir(base) == 0) {
         mkdir("data", 0775);  /* best effort; ignored if it exists */
+        /* The port logs with fprintf(stderr), and logcat does not capture it
+         * here. Keep a copy in ge007.log next to the crash log so the load and
+         * conversion messages survive a crash. */
+        if (freopen("ge007.log", "w", stderr)) {
+            dup2(STDERR_FILENO, STDOUT_FILENO);
+            setvbuf(stderr, NULL, _IONBF, 0);
+        }
     } else {
         sysLogPrintf(LOG_ERROR, "Android: could not enter the app data dir (%s)",
                      base ? base : "(null)");

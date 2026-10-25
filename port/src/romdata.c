@@ -828,13 +828,35 @@ struct afCtx {
 };
 
 /* ROM-layout reads are big-endian. */
+/* A bad offset read from the ROM used to index past the blob and segfault
+ * (game thread, music init). Out-of-range reads now return 0 and log once. */
+static void afReportOOB(const struct afCtx *c, u32 off)
+{
+    static int warned = 0;
+    if (!warned) {
+        warned = 1;
+        sysLogPrintf(LOG_ERROR, "romdataFixupAudioBank: read past end of bank "
+                     "blob (offset 0x%X, blob size 0x%X); audio bank is "
+                     "malformed or was copied from the wrong ROM data",
+                     off, c->srcSize);
+    }
+}
+
 static u16 afRd16(const struct afCtx *c, u32 off)
 {
+    if (c->srcSize < 2 || off > c->srcSize - 2) {
+        afReportOOB(c, off);
+        return 0;
+    }
     return (u16)((c->src[off] << 8) | c->src[off + 1]);
 }
 
 static u32 afRd32(const struct afCtx *c, u32 off)
 {
+    if (c->srcSize < 4 || off > c->srcSize - 4) {
+        afReportOOB(c, off);
+        return 0;
+    }
     return ((u32)c->src[off] << 24) | ((u32)c->src[off + 1] << 16) |
            ((u32)c->src[off + 2] << 8) | (u32)c->src[off + 3];
 }
