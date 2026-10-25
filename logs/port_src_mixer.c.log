@@ -1,0 +1,3 @@
+port/src/mixer.c:13:70: warning: "/*" within comment [-Wcomment]
+   13 |  * "New" ABI — verified against every call site in src/libultra/audio/*.c
+      |                                                                       

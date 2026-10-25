@@ -1,0 +1,217 @@
+In file included from /home/claude/Goldeneye-007-Android-Port/include/PR/gu.h:24,
+                 from /home/claude/Goldeneye-007-Android-Port/include/ultra64.h:13,
+                 from /home/claude/Goldeneye-007-Android-Port/port/shim/bondconstants.h:34,
+                 from port/src/video.c:26:
+/home/claude/Goldeneye-007-Android-Port/include/PR/mbi.h:49: warning: "_SHIFTL" redefined
+   49 | #define _SHIFTL(v, s, w)        \
+      | 
+In file included from port/src/video.c:25:
+/home/claude/Goldeneye-007-Android-Port/port/shim/PR/gbi.h:149: note: this is the location of the previous definition
+  149 | #    define _SHIFTL(v, s, w) ((u32)(((u32)(v) & ((0x01 << (w)) - 1)) << (s)))
+      | 
+/home/claude/Goldeneye-007-Android-Port/include/PR/mbi.h:51: warning: "_SHIFTR" redefined
+   51 | #define _SHIFTR(v, s, w)        \
+      | 
+/home/claude/Goldeneye-007-Android-Port/port/shim/PR/gbi.h:152: note: this is the location of the previous definition
+  152 | #    define _SHIFTR(v, s, w) ((u32)(((u32)(v) >> (s)) & ((0x01 << (w)) - 1)))
+      | 
+In file included from /home/claude/Goldeneye-007-Android-Port/port/shim/bondconstants.h:38:
+/home/claude/Goldeneye-007-Android-Port/port/include/pc_protos.h:24:50: warning: "/*" within comment [-Wcomment]
+   24 |  * C TUs only: C++ translation units (port/fast3d/*.cpp) also reach this header
+      |                                                   
+In file included from /home/claude/Goldeneye-007-Android-Port/port/shim/bondconstants.h:38,
+                 from /home/claude/Goldeneye-007-Android-Port/src/game/chrobjdata.h:5,
+                 from /home/claude/Goldeneye-007-Android-Port/port/shim/bondtypes.h:20,
+                 from /home/claude/Goldeneye-007-Android-Port/port/include/pc_protos.h:38:
+/home/claude/Goldeneye-007-Android-Port/port/include/pc_protos.h:24:50: warning: "/*" within comment [-Wcomment]
+   24 |  * C TUs only: C++ translation units (port/fast3d/*.cpp) also reach this header
+      |                                                   
+In file included from /home/claude/Goldeneye-007-Android-Port/port/shim/bondtypes.h:21,
+                 from /home/claude/Goldeneye-007-Android-Port/src/game/chrobjdata.h:6:
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:398:25: warning: declaration does not declare anything
+  398 |         inherits coord16; //points for tile
+      |                         ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:582:25: warning: declaration does not declare anything
+  582 |         inherits coord3d;
+      |                         ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:2678:40: warning: declaration does not declare anything
+ 2678 |         inherits    PropDefHeaderRecord;
+      |                                        ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:2877:40: warning: declaration does not declare anything
+ 2877 |         inherits           ObjectRecord;
+      |                                        ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3090:37: warning: declaration does not declare anything
+ 3090 |         inherits PropDefHeaderRecord;
+      |                                     ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3104:30: warning: declaration does not declare anything
+ 3104 |         inherits ObjectRecord;
+      |                              ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3136:30: warning: declaration does not declare anything
+ 3136 |         inherits ObjectRecord;
+      |                              ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3197:30: warning: declaration does not declare anything
+ 3197 |         inherits ObjectRecord;
+      |                              ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3240:30: warning: declaration does not declare anything
+ 3240 |         inherits ObjectRecord;
+      |                              ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3252:45: warning: declaration does not declare anything
+ 3252 |         inherits                ObjectRecord;
+      |                                             ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3282:39: warning: declaration does not declare anything
+ 3282 |         inherits   PropDefHeaderRecord;
+      |                                       ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3353:35: warning: declaration does not declare anything
+ 3353 |         inherits      ObjectRecord;
+      |                                   ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3367:35: warning: declaration does not declare anything
+ 3367 |         inherits      ObjectRecord;
+      |                                   ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3391:37: warning: declaration does not declare anything
+ 3391 |         inherits PropDefHeaderRecord;
+      |                                     ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3414:30: warning: declaration does not declare anything
+ 3414 |         inherits ObjectRecord;
+      |                              ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3420:37: warning: declaration does not declare anything
+ 3420 |         inherits PropDefHeaderRecord;
+      |                                     ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3445:30: warning: declaration does not declare anything
+ 3445 |         inherits ObjectRecord;
+      |                              ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3456:30: warning: declaration does not declare anything
+ 3456 |         inherits ObjectRecord;
+      |                              ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3468:52: warning: declaration does not declare anything
+ 3468 |         inherits                PropDefHeaderRecord;
+      |                                                    ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3482:37: warning: declaration does not declare anything
+ 3482 |         inherits PropDefHeaderRecord;
+      |                                     ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3493:58: warning: declaration does not declare anything
+ 3493 |         inherits                      PropDefHeaderRecord; /*0*/
+      |                                                          ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3511:37: warning: declaration does not declare anything
+ 3511 |         inherits PropDefHeaderRecord;
+      |                                     ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3522:37: warning: declaration does not declare anything
+ 3522 |         inherits PropDefHeaderRecord;
+      |                                     ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3533:37: warning: declaration does not declare anything
+ 3533 |         inherits PropDefHeaderRecord;
+      |                                     ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3544:37: warning: declaration does not declare anything
+ 3544 |         inherits PropDefHeaderRecord;
+      |                                     ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3555:37: warning: declaration does not declare anything
+ 3555 |         inherits PropDefHeaderRecord;
+      |                                     ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3566:37: warning: declaration does not declare anything
+ 3566 |         inherits PropDefHeaderRecord;
+      |                                     ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3580:37: warning: declaration does not declare anything
+ 3580 |         inherits PropDefHeaderRecord;
+      |                                     ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3590:37: warning: declaration does not declare anything
+ 3590 |         inherits PropDefHeaderRecord;
+      |                                     ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3603:37: warning: declaration does not declare anything
+ 3603 |         inherits PropDefHeaderRecord;
+      |                                     ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3614:37: warning: declaration does not declare anything
+ 3614 |         inherits PropDefHeaderRecord;
+      |                                     ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3625:37: warning: declaration does not declare anything
+ 3625 |         inherits PropDefHeaderRecord;
+      |                                     ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3636:37: warning: declaration does not declare anything
+ 3636 |         inherits PropDefHeaderRecord;
+      |                                     ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3655:37: warning: declaration does not declare anything
+ 3655 |         inherits PropDefHeaderRecord;
+      |                                     ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3678:33: warning: declaration does not declare anything
+ 3678 |         inherits    ObjectRecord;
+      |                                 ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3705:35: warning: declaration does not declare anything
+ 3705 |         inherits      ObjectRecord;
+      |                                   ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3731:30: warning: declaration does not declare anything
+ 3731 |         inherits ObjectRecord;
+      |                              ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3738:30: warning: declaration does not declare anything
+ 3738 |         inherits ObjectRecord;
+      |                              ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3745:37: warning: declaration does not declare anything
+ 3745 |         inherits PropDefHeaderRecord;
+      |                                     ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3765:30: warning: declaration does not declare anything
+ 3765 |         inherits ObjectRecord;
+      |                              ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3799:37: warning: declaration does not declare anything
+ 3799 |         inherits PropDefHeaderRecord;
+      |                                     ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3813:30: warning: declaration does not declare anything
+ 3813 |         inherits ObjectRecord;
+      |                              ^
+port/src/video.c: In function 'portCrosshairApplyTintCombine':
+port/src/video.c:159:9: warning: implicit declaration of function 'portCrosshairTint'; did you mean 'portCrosshairStyle'? [-Wimplicit-function-declaration]
+  159 |         portCrosshairTint(&r, &g, &b);
+      |         ^~~~~~~~~~~~~~~~~
+      |         portCrosshairStyle
+port/src/video.c: At top level:
+port/src/video.c:182:6: warning: conflicting types for 'portCrosshairTint'; have 'void(s32 *, s32 *, s32 *)' {aka 'void(int *, int *, int *)'}
+  182 | void portCrosshairTint(s32 *r, s32 *g, s32 *b)
+      |      ^~~~~~~~~~~~~~~~~
+port/src/video.c:159:9: note: previous implicit declaration of 'portCrosshairTint' with type 'void(s32 *, s32 *, s32 *)' {aka 'void(int *, int *, int *)'}
+  159 |         portCrosshairTint(&r, &g, &b);
+      |         ^~~~~~~~~~~~~~~~~
+port/src/video.c: In function 'portFovHorizDegrees':
+port/src/video.c:349:18: warning: implicit declaration of function 'sqrt' [-Wimplicit-function-declaration]
+  349 |             v *= sqrt((double)gfx_current_dimensions.aspect_ratio / (4.0 / 3.0));
+      |                  ^~~~
+port/src/video.c:39:1: note: include '<math.h>' or provide a declaration of 'sqrt'
+   38 | #include "../fast3d/gfx_opengl.h"
+  +++ |+#include <math.h>
+   39 | 
+port/src/video.c:349:18: warning: incompatible implicit declaration of built-in function 'sqrt' [-Wbuiltin-declaration-mismatch]
+  349 |             v *= sqrt((double)gfx_current_dimensions.aspect_ratio / (4.0 / 3.0));
+      |                  ^~~~
+port/src/video.c:349:18: note: include '<math.h>' or provide a declaration of 'sqrt'
+port/src/video.c:357:24: warning: implicit declaration of function 'atan' [-Wimplicit-function-declaration]
+  357 |     return (f32)(2.0 * atan(tan(v * 0.5 * kRad) * asp) / kRad);
+      |                        ^~~~
+port/src/video.c:357:24: note: include '<math.h>' or provide a declaration of 'atan'
+port/src/video.c:357:24: warning: incompatible implicit declaration of built-in function 'atan' [-Wbuiltin-declaration-mismatch]
+port/src/video.c:357:24: note: include '<math.h>' or provide a declaration of 'atan'
+port/src/video.c:357:29: warning: implicit declaration of function 'tan' [-Wimplicit-function-declaration]
+  357 |     return (f32)(2.0 * atan(tan(v * 0.5 * kRad) * asp) / kRad);
+      |                             ^~~
+port/src/video.c:357:29: note: include '<math.h>' or provide a declaration of 'tan'
+port/src/video.c:357:29: warning: incompatible implicit declaration of built-in function 'tan' [-Wbuiltin-declaration-mismatch]
+port/src/video.c:357:29: note: include '<math.h>' or provide a declaration of 'tan'
+port/src/video.c: In function 'portRoomPoolScale':
+port/src/video.c:507:9: warning: implicit declaration of function 'powf' [-Wimplicit-function-declaration]
+  507 |     t = powf(portDrawDistanceMultiplier(), 0.66f);   /* D294 2026-09-30: was sqrtf; 4^0.66 = 2.5 */
+      |         ^~~~
+port/src/video.c:507:9: note: include '<math.h>' or provide a declaration of 'powf'
+port/src/video.c:507:9: warning: incompatible implicit declaration of built-in function 'powf' [-Wbuiltin-declaration-mismatch]
+port/src/video.c:507:9: note: include '<math.h>' or provide a declaration of 'powf'
+port/src/video.c:521:13: warning: implicit declaration of function 'ceilf' [-Wimplicit-function-declaration]
+  521 |     scale = ceilf(scale * 4.0f - 0.01f) / 4.0f;
+      |             ^~~~~
+port/src/video.c:521:13: note: include '<math.h>' or provide a declaration of 'ceilf'
+port/src/video.c:521:13: warning: incompatible implicit declaration of built-in function 'ceilf' [-Wbuiltin-declaration-mismatch]
+port/src/video.c:521:13: note: include '<math.h>' or provide a declaration of 'ceilf'
+port/src/video.c: In function 'videoHostExitIfRequested':
+port/src/video.c:1185:5: warning: implicit declaration of function 'exit' [-Wimplicit-function-declaration]
+ 1185 |     exit(0);
+      |     ^~~~
+port/src/video.c:39:1: note: include '<stdlib.h>' or provide a declaration of 'exit'
+   38 | #include "../fast3d/gfx_opengl.h"
+  +++ |+#include <stdlib.h>
+   39 | 
+port/src/video.c:1185:5: warning: incompatible implicit declaration of built-in function 'exit' [-Wbuiltin-declaration-mismatch]
+ 1185 |     exit(0);
+      |     ^~~~
+port/src/video.c:1185:5: note: include '<stdlib.h>' or provide a declaration of 'exit'

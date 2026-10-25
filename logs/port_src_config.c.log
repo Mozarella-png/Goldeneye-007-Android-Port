@@ -1,0 +1,3 @@
+port/src/config.c:32:30: warning: "/*" within comment [-Wcomment]
+   32 |  * existing scripts (tools_pc/*.sh) are unaffected; the ini is a fallback for
+      |                               

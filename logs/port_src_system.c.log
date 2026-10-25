@@ -1,0 +1,28 @@
+port/src/system.c:26: warning: "_POSIX_C_SOURCE" redefined
+   26 |   #define _POSIX_C_SOURCE 200112L
+      | 
+In file included from /usr/include/x86_64-linux-gnu/bits/libc-header-start.h:33,
+                 from /usr/include/stdio.h:28,
+                 from port/src/system.c:7:
+/usr/include/features.h:292: note: this is the location of the previous definition
+  292 | # define _POSIX_C_SOURCE        200809L
+      | 
+port/src/system.c: In function 'sysFatalError':
+port/src/system.c:111:5: warning: implicit declaration of function 'abort' [-Wimplicit-function-declaration]
+  111 |     abort();
+      |     ^~~~~
+port/src/system.c:33:1: note: include '<stdlib.h>' or provide a declaration of 'abort'
+   32 | #include "system.h"
+  +++ |+#include <stdlib.h>
+   33 | 
+port/src/system.c:111:5: warning: incompatible implicit declaration of built-in function 'abort' [-Wbuiltin-declaration-mismatch]
+  111 |     abort();
+      |     ^~~~~
+port/src/system.c:111:5: note: include '<stdlib.h>' or provide a declaration of 'abort'
+port/src/system.c: In function 'sysExit':
+port/src/system.c:340:5: warning: implicit declaration of function 'exit' [-Wimplicit-function-declaration]
+  340 |     exit(code);
+      |     ^~~~
+port/src/system.c:340:5: note: include '<stdlib.h>' or provide a declaration of 'exit'
+port/src/system.c:340:5: warning: incompatible implicit declaration of built-in function 'exit' [-Wbuiltin-declaration-mismatch]
+port/src/system.c:340:5: note: include '<stdlib.h>' or provide a declaration of 'exit'

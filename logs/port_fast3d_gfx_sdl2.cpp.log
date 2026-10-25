@@ -1,0 +1,4 @@
+cc1plus: warning: command-line option '-Wno-pointer-sign' is valid for C/ObjC but not for C++
+port/fast3d/gfx_sdl2.cpp:499:19: warning: 'gfx_pre_swap_hook' initialized and declared 'extern'
+  499 | extern "C" void (*gfx_pre_swap_hook)(void) = NULL;
+      |                   ^~~~~~~~~~~~~~~~~

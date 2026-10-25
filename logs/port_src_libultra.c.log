@@ -1,0 +1,4 @@
+port/src/libultra.c: In function 'geEepromLoad':
+port/src/libultra.c:1114:5: warning: implicit declaration of function 'geEepImportEmulatorSave' [-Wimplicit-function-declaration]
+ 1114 |     geEepImportEmulatorSave(path);
+      |     ^~~~~~~~~~~~~~~~~~~~~~~

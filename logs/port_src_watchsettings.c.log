@@ -1,0 +1,146 @@
+In file included from /home/claude/Goldeneye-007-Android-Port/port/shim/PR/ucode.h:26,
+                 from /home/claude/Goldeneye-007-Android-Port/include/ultra64.h:18,
+                 from port/src/watchsettings.c:6:
+/home/claude/Goldeneye-007-Android-Port/port/include/pc_protos.h:24:50: warning: "/*" within comment [-Wcomment]
+   24 |  * C TUs only: C++ translation units (port/fast3d/*.cpp) also reach this header
+      |                                                   
+In file included from /home/claude/Goldeneye-007-Android-Port/port/shim/bondconstants.h:38,
+                 from /home/claude/Goldeneye-007-Android-Port/src/game/chrobjdata.h:5,
+                 from /home/claude/Goldeneye-007-Android-Port/port/shim/bondtypes.h:20,
+                 from /home/claude/Goldeneye-007-Android-Port/port/include/pc_protos.h:38:
+/home/claude/Goldeneye-007-Android-Port/port/include/pc_protos.h:24:50: warning: "/*" within comment [-Wcomment]
+   24 |  * C TUs only: C++ translation units (port/fast3d/*.cpp) also reach this header
+      |                                                   
+In file included from /home/claude/Goldeneye-007-Android-Port/port/shim/bondtypes.h:21,
+                 from /home/claude/Goldeneye-007-Android-Port/src/game/chrobjdata.h:6:
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:398:25: warning: declaration does not declare anything
+  398 |         inherits coord16; //points for tile
+      |                         ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:582:25: warning: declaration does not declare anything
+  582 |         inherits coord3d;
+      |                         ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:2678:40: warning: declaration does not declare anything
+ 2678 |         inherits    PropDefHeaderRecord;
+      |                                        ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:2877:40: warning: declaration does not declare anything
+ 2877 |         inherits           ObjectRecord;
+      |                                        ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3090:37: warning: declaration does not declare anything
+ 3090 |         inherits PropDefHeaderRecord;
+      |                                     ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3104:30: warning: declaration does not declare anything
+ 3104 |         inherits ObjectRecord;
+      |                              ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3136:30: warning: declaration does not declare anything
+ 3136 |         inherits ObjectRecord;
+      |                              ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3197:30: warning: declaration does not declare anything
+ 3197 |         inherits ObjectRecord;
+      |                              ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3240:30: warning: declaration does not declare anything
+ 3240 |         inherits ObjectRecord;
+      |                              ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3252:45: warning: declaration does not declare anything
+ 3252 |         inherits                ObjectRecord;
+      |                                             ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3282:39: warning: declaration does not declare anything
+ 3282 |         inherits   PropDefHeaderRecord;
+      |                                       ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3353:35: warning: declaration does not declare anything
+ 3353 |         inherits      ObjectRecord;
+      |                                   ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3367:35: warning: declaration does not declare anything
+ 3367 |         inherits      ObjectRecord;
+      |                                   ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3391:37: warning: declaration does not declare anything
+ 3391 |         inherits PropDefHeaderRecord;
+      |                                     ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3414:30: warning: declaration does not declare anything
+ 3414 |         inherits ObjectRecord;
+      |                              ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3420:37: warning: declaration does not declare anything
+ 3420 |         inherits PropDefHeaderRecord;
+      |                                     ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3445:30: warning: declaration does not declare anything
+ 3445 |         inherits ObjectRecord;
+      |                              ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3456:30: warning: declaration does not declare anything
+ 3456 |         inherits ObjectRecord;
+      |                              ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3468:52: warning: declaration does not declare anything
+ 3468 |         inherits                PropDefHeaderRecord;
+      |                                                    ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3482:37: warning: declaration does not declare anything
+ 3482 |         inherits PropDefHeaderRecord;
+      |                                     ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3493:58: warning: declaration does not declare anything
+ 3493 |         inherits                      PropDefHeaderRecord; /*0*/
+      |                                                          ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3511:37: warning: declaration does not declare anything
+ 3511 |         inherits PropDefHeaderRecord;
+      |                                     ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3522:37: warning: declaration does not declare anything
+ 3522 |         inherits PropDefHeaderRecord;
+      |                                     ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3533:37: warning: declaration does not declare anything
+ 3533 |         inherits PropDefHeaderRecord;
+      |                                     ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3544:37: warning: declaration does not declare anything
+ 3544 |         inherits PropDefHeaderRecord;
+      |                                     ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3555:37: warning: declaration does not declare anything
+ 3555 |         inherits PropDefHeaderRecord;
+      |                                     ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3566:37: warning: declaration does not declare anything
+ 3566 |         inherits PropDefHeaderRecord;
+      |                                     ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3580:37: warning: declaration does not declare anything
+ 3580 |         inherits PropDefHeaderRecord;
+      |                                     ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3590:37: warning: declaration does not declare anything
+ 3590 |         inherits PropDefHeaderRecord;
+      |                                     ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3603:37: warning: declaration does not declare anything
+ 3603 |         inherits PropDefHeaderRecord;
+      |                                     ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3614:37: warning: declaration does not declare anything
+ 3614 |         inherits PropDefHeaderRecord;
+      |                                     ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3625:37: warning: declaration does not declare anything
+ 3625 |         inherits PropDefHeaderRecord;
+      |                                     ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3636:37: warning: declaration does not declare anything
+ 3636 |         inherits PropDefHeaderRecord;
+      |                                     ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3655:37: warning: declaration does not declare anything
+ 3655 |         inherits PropDefHeaderRecord;
+      |                                     ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3678:33: warning: declaration does not declare anything
+ 3678 |         inherits    ObjectRecord;
+      |                                 ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3705:35: warning: declaration does not declare anything
+ 3705 |         inherits      ObjectRecord;
+      |                                   ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3731:30: warning: declaration does not declare anything
+ 3731 |         inherits ObjectRecord;
+      |                              ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3738:30: warning: declaration does not declare anything
+ 3738 |         inherits ObjectRecord;
+      |                              ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3745:37: warning: declaration does not declare anything
+ 3745 |         inherits PropDefHeaderRecord;
+      |                                     ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3765:30: warning: declaration does not declare anything
+ 3765 |         inherits ObjectRecord;
+      |                              ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3799:37: warning: declaration does not declare anything
+ 3799 |         inherits PropDefHeaderRecord;
+      |                                     ^
+/home/claude/Goldeneye-007-Android-Port/src/bondtypes.h:3813:30: warning: declaration does not declare anything
+ 3813 |         inherits ObjectRecord;
+      |                              ^
+In file included from /home/claude/Goldeneye-007-Android-Port/src/game/player.h:6,
+                 from port/src/watchsettings.c:13:
+/home/claude/Goldeneye-007-Android-Port/src/game/bondview.h:451:3: warning: "/*" within comment [-Wcomment]
+  451 |   /* 0x00a0 */ f32 ducking_height_offset; // canonical "crouchoffset" ?
+      |    

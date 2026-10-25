@@ -1,0 +1,1 @@
+cc1plus: warning: command-line option '-Wno-pointer-sign' is valid for C/ObjC but not for C++

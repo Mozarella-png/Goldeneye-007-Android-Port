@@ -1,0 +1,5 @@
+cc1plus: warning: command-line option '-Wno-pointer-sign' is valid for C/ObjC but not for C++
+port/fast3d/gfx_pc.cpp: In function 'void zf_note_emit(uint32_t, LoadedVertex* const*)':
+port/fast3d/gfx_pc.cpp:1842:53: warning: suggest parentheses around '&&' within '||' [-Wparentheses]
+ 1842 |                 if (o < ZF_MIN_OSC || (o % 10) != 0 && o != ZF_MIN_OSC) goto zf_push;
+      |                                                     ^

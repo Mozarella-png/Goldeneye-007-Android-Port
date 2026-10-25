@@ -1,0 +1,4 @@
+port/src/romconvert.c: In function 'rcRunConverter':
+port/src/romconvert.c:168:41: warning: initialization discards 'const' qualifier from pointer target type [-Wdiscarded-qualifiers]
+  168 |         execv(exePath, (char *const[]){ exePath, "--rom", (char *)rom,
+      |                                         ^~~~~~~

@@ -1,0 +1,16 @@
+cc1plus: warning: command-line option '-Wno-pointer-sign' is valid for C/ObjC but not for C++
+port/fast3d/gfx_opengl.cpp: In function 'ShaderProgram* gfx_opengl_create_and_load_new_shader(uint64_t, uint32_t)':
+port/fast3d/gfx_opengl.cpp:606:78: warning: format '%llx' expects argument of type 'long long unsigned int', but argument 3 has type 'uint64_t' {aka 'long unsigned int'} [-Wformat=]
+  606 |         sysLogPrintf(LOG_ERROR, "Failed to compile this vertex shader (ID %llx, %x):\n%s", shader_id0, shader_id1, vs_buf);
+      |                                                                           ~~~^             ~~~~~~~~~~
+      |                                                                              |             |
+      |                                                                              |             uint64_t {aka long unsigned int}
+      |                                                                              long long unsigned int
+      |                                                                           %lx
+port/fast3d/gfx_opengl.cpp:619:80: warning: format '%llx' expects argument of type 'long long unsigned int', but argument 3 has type 'uint64_t' {aka 'long unsigned int'} [-Wformat=]
+  619 |         sysLogPrintf(LOG_ERROR, "Failed to compile this fragment shader (ID %llx, %x):\n%s", shader_id0, shader_id1, fs_buf);
+      |                                                                             ~~~^             ~~~~~~~~~~
+      |                                                                                |             |
+      |                                                                                |             uint64_t {aka long unsigned int}
+      |                                                                                long long unsigned int
+      |                                                                             %lx
