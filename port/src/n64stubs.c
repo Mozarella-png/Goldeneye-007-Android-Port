@@ -166,3 +166,12 @@ void osCreateViManager(OSPri pri) { (void)pri; }
 /* sched.c only calls this for the debug stderr overlay (off at boot), so a   */
 /* no-op is safe.                                                             */
 void crashRenderFrame(u16 *buffer) { (void)buffer; }
+
+/* src/sched.c:583 calls assert(expr) where the game's assert macro (include/
+ * assert.h) is not in scope. Nothing defined the function, so the Android
+ * link failed with "undefined symbol: assert". The call sits in a branch that
+ * is never taken (`avail & OS_SC_DP == 0` parses as `avail & (OS_SC_DP == 0)`),
+ * so a no-op definition is safe; it matches the declaration in pc_protos.h. */
+void assert()
+{
+}
