@@ -206,6 +206,15 @@ s32 g_DebugPortalsInputBuffer2 = 0;
 s32 g_DebugPortalsInputBuffer3 = 0;
 s32 g_DebugPortalsInputBuffer4 = 0;
 
+#ifdef PORT
+/* PC/Android port: the N64 weak alias (#pragma weak X = Y) is a macro here.
+ * Clang rejects the alias form and reports these names as ambiguous. Reads
+ * and writes go to the same variable, so behaviour is unchanged. */
+#define g_DebugPortalsInputBufferSource1 g_DebugPortalsInputBuffer1
+#define g_DebugPortalsInputBufferSource2 g_DebugPortalsInputBuffer2
+#define g_DebugPortalsInputBufferSource3 g_DebugPortalsInputBuffer3
+#define g_DebugPortalsInputBufferSource4 g_DebugPortalsInputBuffer4
+#else
 extern s32 g_DebugPortalsInputBufferSource1;
 extern s32 g_DebugPortalsInputBufferSource2;
 extern s32 g_DebugPortalsInputBufferSource3;
@@ -215,6 +224,7 @@ extern s32 g_DebugPortalsInputBufferSource4;
 #pragma weak g_DebugPortalsInputBufferSource2 = g_DebugPortalsInputBuffer2
 #pragma weak g_DebugPortalsInputBufferSource3 = g_DebugPortalsInputBuffer3
 #pragma weak g_DebugPortalsInputBufferSource4 = g_DebugPortalsInputBuffer4
+#endif
 
 /**
  * Something debug related in the MP manage method.

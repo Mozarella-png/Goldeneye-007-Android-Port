@@ -29,7 +29,6 @@ if(GE_BUILD_PORT)
   message(STATUS "GE_BUILD_PORT=ON: building the port from ${GE_ROOT}")
 
   # Same values the PC build uses for ROMID=ntsc-final (CMakeLists.txt).
-  # Keep in sync if the root build's region table changes.
   set(ASSET_REGION "u")
   set(VERSION_IS_PAL 0)
   set(TARGET_IS_64BIT TRUE)
@@ -38,8 +37,6 @@ if(GE_BUILD_PORT)
     -DLEFTOVERDEBUG -DLEFTOVERSPECTRUM -DBUGFIX_R0 -DBYTEMATCH)
 
   # Template variables the root CMakeLists.txt defines for port/include/*.in.
-  # Values for the PC build come from its own logic; these are the Android
-  # equivalents (NDK sysroot instead of the host gcc).
   set(TARGET_PLATFORM "${ANDROID_ABI}-android")
   set(ROMID "ntsc-final")
   set(VERSION_CODENAME "larkspur")
@@ -52,15 +49,14 @@ if(GE_BUILD_PORT)
     set(VERSION_HASH "unknown")
   endif()
   # Host C headers that the port's hoststdlib/hoststring/... wrappers include.
-  # On Android these come from the NDK sysroot and the clang resource dir.
   execute_process(COMMAND "${CMAKE_C_COMPILER}" -print-file-name=include
                   OUTPUT_VARIABLE _GE_CLANG_INC OUTPUT_STRIP_TRAILING_WHITESPACE)
   set(PORT_HOST_STDDDEF_H "${_GE_CLANG_INC}/stddef.h")
   set(PORT_HOST_STRING_H  "${CMAKE_SYSROOT}/usr/include/string.h")
   set(PORT_HOST_SCHED_H   "${CMAKE_SYSROOT}/usr/include/sched.h")
   set(PORT_HOST_STDLIB_H  "${CMAKE_SYSROOT}/usr/include/stdlib.h")
-  # Real zlib for rzdecomp.c. The NDK sysroot does not ship zlib.h, so CI fetches
-  # the zlib source into app/src/main/cpp/zlib and it builds as a subdirectory.
+
+  # Real zlib for rzdecomp.c (CI fetches zlib v1.3.1 into app/src/main/cpp/zlib).
   set(GE_ZLIB_SRC "${CMAKE_CURRENT_SOURCE_DIR}/zlib")
   if(NOT EXISTS "${GE_ZLIB_SRC}/zlib.h")
     message(FATAL_ERROR "zlib source missing in app/src/main/cpp/zlib (CI fetches zlib v1.3.1 there)")
@@ -71,12 +67,21 @@ if(GE_BUILD_PORT)
   set(GE_ZLIB_LIB zlibstatic)
   set(GE_ZLIB_INCLUDES "${GE_ZLIB_SRC}" "${CMAKE_CURRENT_BINARY_DIR}/zlib")
 
-  # Generated from the root CMakeLists.txt: source lists (SRC_GAME, SRC_ENGINE,
-  # SRC_ASSETS, SRC_LIBULTRA*, SRC_ROMASSETS, SRC_DRAM_SYMS), add_definitions,
-  # add_compile_options, include_directories and the configure_file steps.
-  include(${CMAKE_CURRENT_SOURCE_DIR}/port.cmake)
+  # Decomp library (game/ subdirectory). It includes port.cmake, which
+  # configures port/include/*.in into ${GE_BIN}/port/include. The port target
+  # below depends on those generated headers, so this must come first.
+  add_subdirectory(game)
 
-  add_definitions(-DPLATFORM_64BIT=1)
+  # Decomp headers the port needs, without the libc shims. Copied so they can be
+  # the only shim-like directory on the port's include path.
+  file(MAKE_DIRECTORY "${GE_BIN}/ge-port-core")
+  file(COPY
+    "${GE_ROOT}/port/shim/bondtypes.h"
+    "${GE_ROOT}/port/shim/bondconstants.h"
+    "${GE_ROOT}/port/shim/bondaicommands.h"
+    "${GE_ROOT}/port/shim/R4300.h"
+    "${GE_ROOT}/port/shim/CPPLib.h"
+    DESTINATION "${GE_BIN}/ge-port-core")
 
   # Port layer and fast3d, as the root build globs them.
   file(GLOB_RECURSE SRC_PORT     "${GE_ROOT}/port/src/*.c")
@@ -84,48 +89,45 @@ if(GE_BUILD_PORT)
   file(GLOB_RECURSE SRC_FAST3D   "${GE_ROOT}/port/fast3d/*.cpp"
                                  "${GE_ROOT}/port/fast3d/glad/*.c")
 
-  set(GE_GAME_C
-    ${SRC_GAME} ${SRC_ENGINE} ${SRC_LIBAUDIO} ${SRC_LIBULTRARE_AUDIO}
-    ${SRC_LIBULTRARE_DATA} ${SRC_LIBULTRARE_LIBC} ${SRC_ASSETS} ${SRC_GU}
-  )
-  # The decomp's `#define inherits struct` (src/bondtypes.h) embeds a base struct
-  # only with a compiler extension: GCC's -fplan9-extensions (the PC build) or
-  # -fms-extensions, which MinGW uses for the same embedding (see the root
-  # CMakeLists.txt). Clang does not accept plan9 extensions, so -fms-extensions.
-  # NDK defaults to -Werror=format-security. The decomp passes a game string
-  # (langGet) as a printf format in several places; GCC on the PC build only
-  # warns. Downgrade to a warning for the decomp sources. Behaviour unchanged.
-  set_source_files_properties(${GE_GAME_C} ${SRC_PORT} PROPERTIES
-    COMPILE_OPTIONS "-fms-extensions;-Wno-error=format-security")
-  # The decomp selects its 64-bit (LP64) layouts with `#if defined(__x86_64__)`
-  # (e.g. music.c MUSIC_ALLOCATION_BYTES, objecthandler.c pool sizes). arm64
-  # Android is LP64 little-endian with the same struct layout, so define the
-  # macro for the decomp's own sources only. Not applied to port/src: system.c
-  # would then pull in x86 intrinsics, and SDL and bionic must not see it.
-  set_source_files_properties(${GE_GAME_C} PROPERTIES
-    COMPILE_DEFINITIONS "__x86_64__=1")
-
-  list(APPEND GE_SOURCES
-    ${SRC_GAME} ${SRC_ENGINE} ${SRC_ROMASSETS} ${SRC_DRAM_SYMS}
-    ${SRC_PORT} ${SRC_PORT_CXX} ${SRC_FAST3D}
-    ${SRC_LIBAUDIO} ${SRC_LIBULTRARE_AUDIO} ${SRC_LIBULTRARE_DATA}
-    ${SRC_LIBULTRARE_LIBC} ${SRC_ASSETS} ${SRC_GU}
-  )
+  list(APPEND GE_SOURCES ${SRC_PORT} ${SRC_PORT_CXX} ${SRC_FAST3D})
 endif()
 
 add_library(main SHARED ${GE_SOURCES})
 
-target_include_directories(main PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 if(GE_BUILD_PORT)
-  target_include_directories(main PRIVATE ${GE_ZLIB_INCLUDES}
-    ${GE_ROOT}/port/include ${GE_ROOT}/port/fast3d ${GE_ROOT}/include
-    ${CMAKE_CURRENT_BINARY_DIR}/port/include)
+  # The port's own compile settings. Target-scoped, so they do not reach the
+  # decomp library (which has its own directory with the shim order).
+  target_compile_definitions(main PRIVATE
+    PORT=1 _LANGUAGE_C=1 AVOID_UB=1 PAL=0 PLATFORM_64BIT=1)
+  target_compile_options(main PRIVATE
+    ${REGION_DEFS}
+    -funsigned-char -fwrapv -fno-strict-aliasing
+    $<$<COMPILE_LANGUAGE:C>:-fms-extensions>
+    $<$<COMPILE_LANGUAGE:C>:-Wno-error=format-security>
+    $<$<COMPILE_LANGUAGE:C>:-include;versioninfo.h>
+    # libc comes from bionic first. The decomp's headers come after the system
+    # headers, so <limits.h>, <stdlib.h>, <string.h>, <stddef.h> are bionic's.
+    -idirafter "${GE_ROOT}/port/shim"
+    -idirafter "${GE_ROOT}/include")
+  target_include_directories(main PRIVATE
+    "${GE_BIN}/ge-port-core"
+    "${GE_ROOT}/port/include"
+    "${GE_ROOT}"
+    "${GE_ROOT}/src"
+    "${GE_ROOT}/src/game"
+    "${GE_ROOT}/src/libultra"
+    "${GE_ROOT}/src/libultra/audio"
+    "${GE_BIN}/port/include"
+    "${GE_ROOT}/port/fast3d"
+    ${GE_ZLIB_INCLUDES})
 endif()
+
+target_include_directories(main PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 # OpenGL ES 3 instead of desktop GL. The port's renderer (port/fast3d/
 # gfx_opengl.cpp) still needs its GLES backend; see ANDROID-README.md.
 if(GE_BUILD_PORT)
-  target_link_libraries(main PRIVATE SDL2 GLESv3 EGL log android m ${GE_ZLIB_LIB})
+  target_link_libraries(main PRIVATE ge_game SDL2 GLESv3 EGL log android m ${GE_ZLIB_LIB})
 else()
   target_link_libraries(main PRIVATE SDL2 GLESv3 EGL log android m z)
 endif()
