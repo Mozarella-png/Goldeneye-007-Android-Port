@@ -71,6 +71,14 @@ if(GE_BUILD_PORT)
   set(GE_ZLIB_LIB zlibstatic)
   set(GE_ZLIB_INCLUDES "${GE_ZLIB_SRC}" "${CMAKE_CURRENT_BINARY_DIR}/zlib")
 
+  # The decomp's `#define inherits struct` idiom (src/bondtypes.h) needs Plan 9
+  # extensions to embed the base struct. The root CMakeLists.txt enables this
+  # inside an if(NOT MINGW) block, which the generator does not copy, so it is
+  # set here. Clang supports the flag. -fpermissive (root build, GCC only) is
+  # not added: it is a GCC flag, and clang downgrades those errors via the
+  # -Wno-error=... flags that port.cmake already sets.
+  add_compile_options($<$<COMPILE_LANGUAGE:C>:-fplan9-extensions>)
+
   # Generated from the root CMakeLists.txt: source lists (SRC_GAME, SRC_ENGINE,
   # SRC_ASSETS, SRC_LIBULTRA*, SRC_ROMASSETS, SRC_DRAM_SYMS), add_definitions,
   # add_compile_options, include_directories and the configure_file steps.
