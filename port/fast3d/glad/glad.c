@@ -41,7 +41,7 @@
 
 /* D38: on PC <stdlib.h> resolves to the decomp's stub (empty body), so the
  * host CRT functions used below need explicit declarations. */
-extern void *malloc(unsigned long long size);
+extern void *malloc(size_t size);
 extern void free(void *ptr);
 
 struct gladGLversionStruct GLVersion = { 0, 0 };

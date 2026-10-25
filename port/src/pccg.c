@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-extern void *malloc(unsigned long long size);
+extern void *malloc(size_t size);
 extern int   snprintf(char *str, size_t maxsize, const char *format, ...);
 
 #include "platform.h"
