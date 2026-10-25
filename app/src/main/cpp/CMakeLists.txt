@@ -84,18 +84,23 @@ if(GE_BUILD_PORT)
   file(GLOB_RECURSE SRC_FAST3D   "${GE_ROOT}/port/fast3d/*.cpp"
                                  "${GE_ROOT}/port/fast3d/glad/*.c")
 
-  set(GE_DECOMP_C
+  set(GE_GAME_C
     ${SRC_GAME} ${SRC_ENGINE} ${SRC_LIBAUDIO} ${SRC_LIBULTRARE_AUDIO}
     ${SRC_LIBULTRARE_DATA} ${SRC_LIBULTRARE_LIBC} ${SRC_ASSETS} ${SRC_GU}
-    ${SRC_PORT}
   )
   # The decomp's `#define inherits struct` (src/bondtypes.h) embeds a base struct
   # only with a compiler extension: GCC's -fplan9-extensions (the PC build) or
-  # -fms-extensions, which the root CMakeLists.txt's own comment notes is what
-  # MinGW uses for the same embedding. Clang does not accept plan9 extensions,
-  # so use -fms-extensions here. Applied per source file, not directory-wide,
-  # so touch_layout.c and the C++ sources are unaffected.
-  set_source_files_properties(${GE_DECOMP_C} PROPERTIES COMPILE_OPTIONS "-fms-extensions")
+  # -fms-extensions, which MinGW uses for the same embedding (see the root
+  # CMakeLists.txt). Clang does not accept plan9 extensions, so -fms-extensions.
+  set_source_files_properties(${GE_GAME_C} ${SRC_PORT} PROPERTIES
+    COMPILE_OPTIONS "-fms-extensions")
+  # The decomp selects its 64-bit (LP64) layouts with `#if defined(__x86_64__)`
+  # (e.g. music.c MUSIC_ALLOCATION_BYTES, objecthandler.c pool sizes). arm64
+  # Android is LP64 little-endian with the same struct layout, so define the
+  # macro for the decomp's own sources only. Not applied to port/src: system.c
+  # would then pull in x86 intrinsics, and SDL and bionic must not see it.
+  set_source_files_properties(${GE_GAME_C} PROPERTIES
+    COMPILE_DEFINITIONS "__x86_64__=1")
 
   list(APPEND GE_SOURCES
     ${SRC_GAME} ${SRC_ENGINE} ${SRC_ROMASSETS} ${SRC_DRAM_SYMS}
