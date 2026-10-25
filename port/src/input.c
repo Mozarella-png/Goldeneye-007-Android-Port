@@ -82,6 +82,9 @@
 #include "input.h"
 #include "envflag.h"
 #include "optionsoverlay.h"
+#if defined(__ANDROID__)
+#include "touchpad.h"
+#endif
 #include "video.h"
 /* D194 absolute aim: read-only access to the live camera (struct player).
  * Game header pulled in through the same shim path every other compiled game
@@ -1542,6 +1545,12 @@ int inputInit(void)
                          SDL_GetError());
         }
     }
+
+#if defined(__ANDROID__)
+    /* Touch controls: a virtual gamepad that the pad code below opens like any
+     * other controller. Must run before inputOpenPads(). */
+    touchpadInit();
+#endif
 
     /* D401: make BT PS4/PS5 pads report haptics (PD input.c:696-697). Must
      * be set before the pads below are opened. */

@@ -23,6 +23,7 @@ option(GE_BUILD_PORT "Compile the GoldenEye port (port/ + game sources)" OFF)
 
 set(GE_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/touch_layout.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/touch_map.c
 )
 
 if(GE_BUILD_PORT)

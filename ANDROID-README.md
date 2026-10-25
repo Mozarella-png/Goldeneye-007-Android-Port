@@ -6,12 +6,28 @@ Este repo contiene el port de PC y el proyecto Android. El proyecto Android est�
 
 | Parte | Estado |
 |---|---|
-| Módulo de controles táctiles (`app/src/main/cpp/touch_layout.*`) | Probado: tests en `tests/` que corre CI en Linux |
-| Proyecto Gradle, manifest, icono "Goldeneye 007" | Compila en CI (`build-apk`) |
-| Entrada del juego y ruta de datos (`port/src/main.c`, `SDL_main`) | Parche aplicado, sin compilar todavía |
+| Controles táctiles: mapeo puro (`app/src/main/cpp/touch_map.*`) | Probado en host: `tests/test_touch_map.c` (11 comprobaciones) y `tests/test_touch_layout.c`, ambos en CI |
+| Controles táctiles: gamepad virtual SDL + overlay GL (`port/src/touchpad.c`) | Escrito y comprobado en sintaxis contra SDL 2.30 y glad. **Sin compilar con NDK ni probado en teléfono** |
+| Entrada del juego y ruta de datos (`SDL_main` en `port/src/main.c`) | Parche aplicado; compila en sintaxis |
+| Renderer GLES 3 (`port/fast3d/gfx_opengl.cpp`, `gfx_sdl2.cpp`) | El código ya tiene rutas ES (precisión, `#version 300 es`, `in`/`out`, carga de glad con `OpenGL ES`, protecciones de depth clamp, timer queries y debug KHR). Contexto ES 3.0 se pide primero en Android. **Sin probar en GPU real** |
 | Conversión del ROM | Herramienta HTML en `tools_pc/android/convertidor-rom.html` |
-| Renderer GLES 3 | Pendiente: el backend usa OpenGL de escritorio |
-| Fuentes del juego en el CMake de Android | Generadas desde el CMake de PC, detrás de `GE_BUILD_PORT`; sin compilar todavía |
+| Compilación nativa del port | Pendiente de ver el log de CI (`build-port-apk`); no se pudo compilar el NDK en el entorno de trabajo |
+
+### Qué hace el control táctil
+
+- Izquierda: stick flotante (se ancla donde pones el dedo) o el stick fijo del layout. Dibujo: anillo y knob.
+- Derecha, zona libre: mirar (stick derecho, anclado al primer toque).
+- Botones del layout: Fuego (gatillo derecho), Apuntar/zoom (gatillo izquierdo), Recargar (X), Usar (A), Arma anterior (D-pad izquierda), Arma siguiente (Y), Pausa (Start).
+- Los toques ya no generan clics de ratón (`SDL_TOUCH_MOUSE_EVENTS=0`), para que un toque no active la captura del cursor.
+- El gamepad virtual se abre igual que un mando físico, así que los presets de Input y el mapeo Jinx 1.1 funcionan sin cambios.
+
+### Limitaciones conocidas de esta versión
+
+- Los botones no tienen etiqueta: son círculos de color.
+- No hay modo de edición (arrastrar y escalar). El layout es el de `touch_layout.c`.
+- El menú de opciones (F10) no es accesible con táctil; se usa la pantalla de pausa de Start.
+- Sin botón de gadget ni de agacharse.
+- Si hay un mando físico conectado, el gamepad virtual puede quedar en un asiento distinto al 1.
 
 ## Carpeta de datos en el teléfono
 
@@ -45,7 +61,8 @@ En CI, el job `build-port-apk` hace eso mismo y no bloquea el resto. El workflow
 
 ## Pendientes, en orden
 
-1. Backend GLES 3 en `port/fast3d/gfx_opengl.cpp`.
-2. Resolver los errores que muestre el log de `build-port-apk`.
-3. Integrar el overlay táctil: cargar los PNG de los controles, dibujarlos con la opacidad guardada, despachar toques con `touchLayoutHit()` y añadir el modo de edición (arrastrar, escalar, opacidad).
-4. Verificar en un teléfono que la superficie ocupe toda la pantalla ultrawide.
+1. Ver el log de `build-port-apk` (artefacto `build-port-log`) y resolver los errores de compilación del NDK. Es el primer bloqueo real.
+2. Probar en el Poco X8 Pro Max (GPU Mali): que arranque, que el overlay se vea y que el juego responda al tacto. Mirar `ge007.log` en la carpeta de datos.
+3. Etiquetas en los botones (texturas PNG), modo de edición y guardado del layout.
+4. Botón de gadget, agacharse y acceso a opciones desde táctil.
+5. Verificar que la superficie ocupe toda la pantalla ultrawide.

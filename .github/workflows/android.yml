@@ -23,6 +23,8 @@ jobs:
           gcc -std=c99 -Wall -Wextra -pedantic -Werror -c app/src/main/cpp/touch_layout.c -o /dev/null
           gcc -std=c99 -Wall -Wextra -Werror -Iapp/src/main/cpp -o test_touch_layout tests/test_touch_layout.c app/src/main/cpp/touch_layout.c
           ./test_touch_layout
+          gcc -std=c99 -Wall -Wextra -pedantic -Werror -Iapp/src/main/cpp -o test_touch_map tests/test_touch_map.c app/src/main/cpp/touch_map.c app/src/main/cpp/touch_layout.c -lm
+          ./test_touch_map
 
   build-apk:
     name: Build debug APK

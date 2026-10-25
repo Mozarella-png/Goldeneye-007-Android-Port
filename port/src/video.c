@@ -30,6 +30,9 @@
 #include "config.h"
 #include "video.h"
 #include "input.h"
+#if defined(__ANDROID__)
+#include "touchpad.h"
+#endif
 #include "optionsoverlay.h"
 #include "audio.h"
 
@@ -1275,6 +1278,13 @@ void videoPumpEvents(void)
     SDL_Event ev;
     while (SDL_PollEvent(&ev)) {
         switch (ev.type) {
+#if defined(__ANDROID__)
+        case SDL_FINGERDOWN:
+        case SDL_FINGERMOTION:
+        case SDL_FINGERUP:
+            touchpadHandleEvent(&ev);
+            break;
+#endif
         case SDL_AUDIODEVICEREMOVED:
             /* D470: an open output device vanished; audio.c falls back to default. */
             if (!ev.adevice.iscapture) audioNotifyDeviceRemoved(ev.adevice.which);

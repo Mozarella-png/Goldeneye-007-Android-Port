@@ -176,6 +176,9 @@ static void gfx_sdl_init(const struct GfxWindowInitSettings *set) {
     // if that doesn't work, try 3.2 core in case we're on mac, 2.1 compat as a last resort
     static u32 glver[][3] = {
         { 0, 0, 0                                    }, // for command line override
+#if defined(__ANDROID__)
+        { 3, 0, SDL_GL_CONTEXT_PROFILE_ES            }, // Android: EGL only offers GLES, so try it first
+#endif
         { 3, 0, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY }, // 3.0: default, has all the features required
         { 4, 1, SDL_GL_CONTEXT_PROFILE_CORE          }, // 4.1core: macs only have core profile and this is the latest
         { 3, 2, SDL_GL_CONTEXT_PROFILE_CORE          }, // 3.2core: older macs will only have this at best
@@ -498,6 +501,10 @@ static inline void sync_framerate_with_timer(void) {
  * on buffer-exchange drivers (Mesa, WSLg) and yields a black capture. */
 extern "C" void (*gfx_pre_swap_hook)(void) = NULL;
 
+#if defined(__ANDROID__)
+extern "C" void touchpadDraw(int drawableW, int drawableH);   /* port/src/touchpad.c */
+#endif
+
 static void gfx_sdl_swap_buffers_begin(void) {
     if (target_fps) {
         sync_framerate_with_timer();
@@ -505,6 +512,13 @@ static void gfx_sdl_swap_buffers_begin(void) {
     if (gfx_pre_swap_hook) {
         gfx_pre_swap_hook();
     }
+#if defined(__ANDROID__)
+    {
+        int dw = 0, dh = 0;
+        SDL_GL_GetDrawableSize(wnd, &dw, &dh);
+        touchpadDraw(dw, dh);
+    }
+#endif
     SDL_GL_SwapWindow(wnd);
 }
 
