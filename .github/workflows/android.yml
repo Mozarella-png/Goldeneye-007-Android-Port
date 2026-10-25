@@ -61,3 +61,56 @@ jobs:
           name: Goldeneye007-debug
           path: app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
+
+  build-port-apk:
+    name: Build APK with the port (experimental, non-blocking)
+    needs: touch-tests
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Install NDK and CMake
+        run: |
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "ndk;${NDK_VERSION}" "cmake;3.22.1" "platforms;android-34" "build-tools;34.0.0"
+
+      - name: Fetch SDL2 ${{ env.SDL_VERSION }}
+        run: |
+          curl -fsSL "https://github.com/libsdl-org/SDL/archive/refs/tags/release-${SDL_VERSION}.tar.gz" -o sdl.tar.gz
+          tar -xzf sdl.tar.gz
+          mv "SDL-release-${SDL_VERSION}" app/src/main/cpp/SDL
+          mkdir -p app/src/main/java/org/libsdl/app
+          cp app/src/main/cpp/SDL/android-project/app/src/main/java/org/libsdl/app/*.java app/src/main/java/org/libsdl/app/
+
+      - name: Regenerate port CMake from the PC build
+        run: python3 tools_pc/android/gen_port_cmake.py
+
+      - name: Build APK with the port
+        run: |
+          export ANDROID_NDK_HOME="$ANDROID_HOME/ndk/$NDK_VERSION"
+          set -o pipefail
+          gradle --no-daemon -PgeBuildPort=true assembleDebug 2>&1 | tee build-port.log
+
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-port-log
+          path: build-port.log
+          if-no-files-found: warn
+
+      - name: Upload APK (only if it built)
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Goldeneye007-port-debug
+          path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
