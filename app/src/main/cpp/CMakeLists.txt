@@ -71,14 +71,6 @@ if(GE_BUILD_PORT)
   set(GE_ZLIB_LIB zlibstatic)
   set(GE_ZLIB_INCLUDES "${GE_ZLIB_SRC}" "${CMAKE_CURRENT_BINARY_DIR}/zlib")
 
-  # The decomp's `#define inherits struct` idiom (src/bondtypes.h) needs Plan 9
-  # extensions to embed the base struct. The root CMakeLists.txt enables this
-  # inside an if(NOT MINGW) block, which the generator does not copy, so it is
-  # set here. Clang supports the flag. -fpermissive (root build, GCC only) is
-  # not added: it is a GCC flag, and clang downgrades those errors via the
-  # -Wno-error=... flags that port.cmake already sets.
-  add_compile_options($<$<COMPILE_LANGUAGE:C>:-fplan9-extensions>)
-
   # Generated from the root CMakeLists.txt: source lists (SRC_GAME, SRC_ENGINE,
   # SRC_ASSETS, SRC_LIBULTRA*, SRC_ROMASSETS, SRC_DRAM_SYMS), add_definitions,
   # add_compile_options, include_directories and the configure_file steps.
@@ -91,6 +83,19 @@ if(GE_BUILD_PORT)
   file(GLOB_RECURSE SRC_PORT_CXX "${GE_ROOT}/port/src/*.cpp")
   file(GLOB_RECURSE SRC_FAST3D   "${GE_ROOT}/port/fast3d/*.cpp"
                                  "${GE_ROOT}/port/fast3d/glad/*.c")
+
+  set(GE_DECOMP_C
+    ${SRC_GAME} ${SRC_ENGINE} ${SRC_LIBAUDIO} ${SRC_LIBULTRARE_AUDIO}
+    ${SRC_LIBULTRARE_DATA} ${SRC_LIBULTRARE_LIBC} ${SRC_ASSETS} ${SRC_GU}
+    ${SRC_PORT}
+  )
+  # The decomp's `#define inherits struct` (src/bondtypes.h) embeds a base struct
+  # only with a compiler extension: GCC's -fplan9-extensions (the PC build) or
+  # -fms-extensions, which the root CMakeLists.txt's own comment notes is what
+  # MinGW uses for the same embedding. Clang does not accept plan9 extensions,
+  # so use -fms-extensions here. Applied per source file, not directory-wide,
+  # so touch_layout.c and the C++ sources are unaffected.
+  set_source_files_properties(${GE_DECOMP_C} PROPERTIES COMPILE_OPTIONS "-fms-extensions")
 
   list(APPEND GE_SOURCES
     ${SRC_GAME} ${SRC_ENGINE} ${SRC_ROMASSETS} ${SRC_DRAM_SYMS}
