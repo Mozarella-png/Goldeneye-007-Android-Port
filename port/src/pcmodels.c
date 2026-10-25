@@ -262,8 +262,6 @@ void pcmodelsPatchTable(void)
     else
         sysLogPrintf(LOG_INFO, "pcmodels: table patched (%d model entries)",
                      hit);
-
-    pcmodelsReportBadTableEntries();
 }
 
 uint32_t pcmodelsTotalSize(void)

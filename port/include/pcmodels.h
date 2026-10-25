@@ -36,6 +36,9 @@ int      pcmodelsLoadSidecars(uintptr_t cartBase, uint32_t romSize);
  * every manifest row. Must run after obInit() (obInit derives rom_size from
  * adjacent hw_address deltas). No-op if the sidecar image is absent. */
 void     pcmodelsPatchTable(void);
+/* Logs every file_resource_table hw_address outside the cart map. Called once
+ * by pccgPatchTable(), after both table patches. */
+void     pcmodelsReportBadTableEntries(void);
 
 uint32_t pcmodelsTotalSize(void);
 

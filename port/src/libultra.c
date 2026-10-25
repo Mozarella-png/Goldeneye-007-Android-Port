@@ -427,6 +427,10 @@ void osCreateThread(OSThread *t, OSId id, void (*entry)(void *), void *arg,
  * puts pthread stacks above 4 GiB, so those truncations corrupt. Force each
  * game-thread stack into the low 2 GiB with MAP_32BIT so every such idiom
  * works exactly as on the console. Windows pthread stacks are already low. */
+#if !defined(MAP_32BIT) && !defined(MAP_FIXED_NOREPLACE)
+#define MAP_FIXED_NOREPLACE 0x100000   /* Linux value; bionic headers may lack it */
+#endif
+
 static void *portAllocLowStack(size_t sz)
 {
 #if defined(MAP_32BIT)
@@ -438,6 +442,21 @@ static void *portAllocLowStack(size_t sz)
                    , -1, 0);
     if (p != MAP_FAILED)
         return p;
+#elif defined(__ANDROID__)
+    /* bionic has no MAP_32BIT, so the stack landed above 4 GiB and every
+     * (u32) truncation of a stack pointer in the game corrupted its DMA
+     * source. Probe for a free window below 4 GiB instead. MAP_FIXED_NOREPLACE
+     * refuses any occupied range, so the ART heap and the cart map at
+     * 0x40000000 are never overwritten; a result above 4 GiB is unmapped. */
+    for (uintptr_t a = 0x20000000u; a + sz <= 0xE0000000u; a += 0x01000000u) {
+        void *p = mmap((void *)a, sz, PROT_READ | PROT_WRITE,
+                       MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED_NOREPLACE, -1, 0);
+        if (p == MAP_FAILED)
+            continue;
+        if ((uintptr_t)p + sz <= 0x100000000ull)
+            return p;
+        munmap(p, sz);
+    }
 #endif
     return NULL;
 }

@@ -112,9 +112,34 @@ Qué buscar en el próximo log:
 - Si aparecen entradas malas, el nombre dice qué asset se carga mal y de dónde viene. Ahí está el origen del puntero.
 - Si la tabla sale limpia, el puntero malo lo calcula el juego en tiempo de ejecución. En ese caso hay que sacar el caller del DMA, con la pila que ya registra `piServiceDma` para destinos inválidos, y resolverlo con `addr2line` sobre `libmain.so` sin stripear.
 
+## Tercer log (2026-10-25): causa de los punteros malos
+
+El log tiene dos pistas:
+
+- `table: 214 entries point outside the cart map`. Pero la validación corría antes de que `pccg` parchee las entradas `bg/*`. Ahora corre al final de `pccgPatchTable()`, con las dos tablas ya parchadas.
+- El crash ya no es SIGSEGV sino SIGBUS (signal 7), con una dirección de 64 bits.
+
+La causa de fondo:
+
+El decomp asume que los punteros caben en 32 bits. Por eso `portAllocLowStack()` fuerza las pilas de los hilos del juego por debajo de 2 GB con `MAP_32BIT`, para que los `(u32)compbuffer` del decomp no se trunquen. Pero `MAP_32BIT` solo existe en x86. En Android la función devolvía NULL y las pilas quedaban en `0x77…`, por encima de 4 GB. Cada truncamiento a 32 bits corrompía la fuente del DMA, que es justo lo que se ve en los logs (`0x239E8250`, `0x5314b700`).
+
+Cambio:
+
+- En Android, `portAllocLowStack()` busca una ventana libre por debajo de 4 GB con `MAP_FIXED_NOREPLACE`, probando desde `0x20000000` en pasos de 16 MB. El kernel rechaza las regiones ya ocupadas, así que no pisa el heap de ART ni la ROM en `0x40000000`.
+
+Lo que puede seguir fallando:
+
+- El heap (`malloc`) también queda por encima de 4 GB en Android. Si siguen apareciendo fuentes de DMA truncadas después de este cambio, el siguiente paso es un asignador propio para la memoria del juego, en una ventana baja, igual que el DRAM del port.
+
+Qué buscar en el próximo log:
+
+- Debe desaparecer el bloque `table: entry N … outside the cart map`, o quedar solo unas pocas entradas, que serían las que el juego fija en tiempo de ejecución.
+- Desaparecen los `osPiStartDma: ROM read out of range`, o se reducen.
+- Si el crash persiste, la dirección de fallo debería estar por debajo de 4 GB. Si no lo está, el problema es el heap y hay que ir a por el asignador.
+
 ## Pendientes, en orden
 
-1. Probar en el Poco y buscar en el log las líneas `table: …`. Si hay entradas malas, es el origen del puntero; si no, el caller del DMA (ver arriba).
+1. Probar en el Poco. Mirar `table: …` (ya al final del arranque) y si las fuentes de DMA quedan por debajo de 4 GB. Si el heap sigue causando punteros truncados, un asignador de juego en ventana baja (ver arriba).
 2. Símbolos del crash con `addr2line` sobre `libmain.so` sin stripear (offset `PC - MODULE`).
 3. Ver el log de `build-port-apk` si el build NDK falla (no se pudo compilar el NDK aquí).
 4. Etiquetas en los botones (texturas PNG), modo de edición y guardado del layout.

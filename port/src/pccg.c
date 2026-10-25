@@ -28,6 +28,7 @@ extern int   snprintf(char *str, size_t maxsize, const char *format, ...);
 #include "system.h"
 #include "fs.h"
 #include "pccg.h"
+#include "pcmodels.h"
 
 /* Order matters: <ultra64.h> must finish before bondtypes.h (see
  * pcmodels.c's comment -- same PR/ucode.h anchor requirement). */
@@ -222,6 +223,9 @@ void pccgPatchTable(void)
     else
         sysLogPrintf(LOG_INFO, "pccg: table patched (%d bg/stan entries)",
                      hit);
+
+    /* Both patches are in: now every hw_address the game will DMA from is set. */
+    pcmodelsReportBadTableEntries();
 }
 
 uint32_t pccgTotalSize(void)
