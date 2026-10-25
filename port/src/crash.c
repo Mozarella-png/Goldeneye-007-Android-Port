@@ -473,6 +473,9 @@ static void crashHandler(int sig, siginfo_t *siginfo, void *ctx)
         pc = (void *)ucontext->uc_mcontext.gregs[REG_EIP];
 #elif defined(PLATFORM_X86_64)
         pc = (void *)ucontext->uc_mcontext.gregs[REG_RIP];
+#elif defined(__aarch64__)
+        /* bionic/arm64: the faulting PC is uc_mcontext.pc (was NULL here). */
+        pc = (void *)ucontext->uc_mcontext.pc;
 #endif
     }
 
