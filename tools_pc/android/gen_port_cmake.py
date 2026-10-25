@@ -92,6 +92,9 @@ def main():
     # src/init.c then resolve from the caller's directory, which works only
     # when the caller is the repo root. The Android CMake lives in
     # app/src/main/cpp, so prefix every entry instead (list(TRANSFORM)).
+    # Android uses the rebased ROM assets (cart base moved off the ART heap).
+    body = body.replace("port/src/romassets_${ASSET_REGION}.s",
+                        "port/src/romassets_android_${ASSET_REGION}.s")
     body = re.sub(
         r'list\(PREPEND (\w+) "\$\{GE_ROOT\}"\)',
         r'list(TRANSFORM \1 PREPEND "${GE_ROOT}/")',

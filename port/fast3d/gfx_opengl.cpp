@@ -1026,7 +1026,12 @@ static void *gl_load_proc(const char *name) {
         }
     }
 
-    sysLogPrintf(LOG_ERROR, "GL: could not find function: %s", name);
+    /* On GLES the desktop-only names (glPolygonMode, glTexImage1D, ...) are
+     * expected to be absent and the renderer never calls them, so that is
+     * not an error there. Keep it an error on desktop GL. */
+    sysLogPrintf(gl_es ? LOG_INFO : LOG_ERROR,
+                 "GL: %s not available in this context (%s)", name,
+                 gl_es ? "expected on GLES" : "missing");
 
     return NULL;
 }

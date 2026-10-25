@@ -29,6 +29,7 @@
 #endif
 
 #include "platform.h"
+#include "portaddr.h"
 #include "system.h"
 #include "config.h"
 #include "updatecheck.h"
@@ -235,7 +236,7 @@ static int portMain(int argc, char **argv)
      *    thread with its own stack); it creates the rmon/idle/scheduler/
      *    audio threads and never returns in practice. */
     sysLogPrintf(LOG_INFO, "ROM mapped at 0x%08X (%u bytes); starting game",
-                (unsigned)0x10000000, romdataGetRomSize());
+                (unsigned)PORT_CART_BASE, romdataGetRomSize());
     /* 4a. D295/M-148: non-JP builds never allocate the JPN glyph cache (langInit
      *     gates it on j_text_trigger), but textRender's high-bit path calls
      *     langGetJpnCharPixels unconditionally and indexes the NULL global

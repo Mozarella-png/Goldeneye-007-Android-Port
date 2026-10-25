@@ -59,10 +59,42 @@ Por defecto, el CMake de Android solo compila el módulo táctil y SDL. Para inc
 
 En CI, el job `build-port-apk` hace eso mismo y no bloquea el resto. El workflow `android.yml` se ejecuta en cada push a `main` y en cada PR, y también puede lanzarse a mano desde la pestaña Actions. `ci.yml` es solo manual. Sube `build-port-log` con el log completo del build, y el APK solo si compila.
 
+## Diagnóstico del log del 2026-10-25 (Poco X8 Pro Max)
+
+Lo que el log confirma:
+
+- Los controles táctiles funcionan a nivel de entrada: `touch: virtual gamepad attached (device 2)` y `opened gamepad 2 'GoldenEye touch controls' as seat 0`.
+- El contexto GL es `GL3.0es` y los shaders usan `GLSL 300 es`.
+- El audio abre con AAudio a 22050 Hz.
+
+Lo que lo tira:
+
+1. **La ROM no se mapea en `0x10000000`.** El heap de ART del proceso ocupa `02000000-12000000` (`[anon:dalvik-main space]`). Como el mapeo fijo falla, `romdataCartAddrValid()` devuelve 0 y todos los DMA de la ROM se descartan (`osPiStartDma: ROM read out of range`). Sin datos, el juego entra en basura y crashea con SIGNAL 11.
+2. El fallback a copia en heap no sirve: los símbolos de assets desreferencian la dirección de cart directamente (lo dice el propio `romdata.c`).
+3. El ruido `GL: could not find function: glPolygonMode…` no es un fallo: son funciones de escritorio que glad busca en GLES. Ya no se registran como error en ES.
+
+Cambios para esto:
+
+- `port/include/portaddr.h`: nuevo `PORT_CART_BASE`. PC sigue en `0x10000000`; Android usa `0x40000000`. `romdata.c`, `pcmodels.c`, `gfx_pc.cpp` (ventana de cart) y el log de `main.c` lo usan.
+- `port/src/romassets_android_{e,u,j}.s`: copias de los `romassets_*.s` con todas las direcciones de cart desplazadas a `0x40000000`. Las genera `tools_pc/android/rebase_romassets.py`. Para `e` y `j` se comprobó que coinciden con la salida de `gen_romassets.py` (solo difieren comentarios). Para `u` no se puede regenerar en el repo porque falta `baserom.u.z64`, así que se usa la transformación; no quedan literales `0x10xxxxxx` en la variante.
+- `tools_pc/android/gen_port_cmake.py` ya apunta `port.cmake` a la variante Android (`port.cmake` regenerado, reproducible).
+- `romdata.c`: en POSIX, si el mapeo falla ahora aborta con un mensaje claro, igual que en Windows, en vez de seguir y crashear después.
+
+Cómo comprobar el próximo log:
+
+- Debe aparecer `ROM mapped at 0x40000000`.
+- No deben aparecer `osPiStartDma: ROM read out of range`.
+- Si `0x40000000` también está ocupado, el log lo dirá con `occupied:`. En ese caso hay que elegir otra base y regenerar la variante.
+
+Riesgo que no se puede verificar desde aquí: que `0x40000000` esté libre en el teléfono y que los sidecars de modelos quepan por debajo de `0x70000000` (DRAM V1).
+
+Para el crash en sí: el log no tiene símbolos. Con `PC=0x77e4439d20` y `MODULE=0x77e42f2000`, el offset dentro del módulo es `0x147D20`. Si el módulo es `libmain.so` sin stripear, `addr2line -e libmain.so 0x147d20` o `ndk-stack` dan la función. Conviene volver a mirarlo después de este arreglo, porque puede desaparecer con la causa.
+
 ## Pendientes, en orden
 
-1. Ver el log de `build-port-apk` (artefacto `build-port-log`) y resolver los errores de compilación del NDK. Es el primer bloqueo real.
-2. Probar en el Poco X8 Pro Max (GPU Mali): que arranque, que el overlay se vea y que el juego responda al tacto. Mirar `ge007.log` en la carpeta de datos.
-3. Etiquetas en los botones (texturas PNG), modo de edición y guardado del layout.
-4. Botón de gadget, agacharse y acceso a opciones desde táctil.
-5. Verificar que la superficie ocupe toda la pantalla ultrawide.
+1. Probar el build nuevo en el Poco: confirmar `ROM mapped at 0x40000000` y que el juego llega a cargar niveles.
+2. Si vuelve a crashear, símbolos del crash (ver arriba) y el log completo.
+3. Ver el log de `build-port-apk` si el build NDK falla (no se pudo compilar el NDK aquí).
+4. Etiquetas en los botones (texturas PNG), modo de edición y guardado del layout.
+5. Botón de gadget, agacharse y acceso a opciones desde táctil.
+6. Verificar que la superficie ocupe toda la pantalla ultrawide.

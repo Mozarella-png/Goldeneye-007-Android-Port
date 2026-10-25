@@ -81,7 +81,7 @@ configure_file(
   "${GE_ROOT}/port/include/realzlib.h.in"
   "${GE_BIN}/port/include/realzlib.h" @ONLY)
 
-set(SRC_ROMASSETS "${GE_ROOT}/port/src/romassets_${ASSET_REGION}.s")
+set(SRC_ROMASSETS "${GE_ROOT}/port/src/romassets_android_${ASSET_REGION}.s")
 
 set(SRC_DRAM_SYMS "${GE_ROOT}/port/src/dram_syms.S")
 

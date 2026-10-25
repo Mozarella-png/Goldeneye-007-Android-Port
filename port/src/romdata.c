@@ -26,6 +26,7 @@ extern void *malloc(size_t size);
 extern int snprintf(char *str, size_t maxsize, const char *format, ...);
 
 #include "platform.h"
+#include "portaddr.h"
 
 #if defined(PLATFORM_WINDOWS)
   #ifndef WIN32_LEAN_AND_MEAN
@@ -51,7 +52,7 @@ extern int snprintf(char *str, size_t maxsize, const char *format, ...);
 #include <ultra64.h>
 #include "bondtypes.h"
 
-#define CART_BASE   0x10000000u
+#define CART_BASE   ((u32)PORT_CART_BASE)
 
 int portLastErrno(void);            /* errnostr.c */
 const char *portLastErrnoText(void);  /* errnostr.c */
@@ -450,6 +451,15 @@ int romdataInit(void)
                     fclose(maps);
                 }
             }
+            /* Same policy as the Windows branch: the heap copy cannot run the
+             * game, so stop here with the reason in the log rather than crash
+             * later in model loading. */
+            sysLogPrintf(LOG_ERROR, "romdataInit: the game needs the ROM mapped "
+                         "at 0x%08X and cannot run from a heap copy; aborting boot. "
+                         "Another mapping (ART heap, a library) holds that range; see "
+                         "the 'occupied' lines above.", CART_BASE);
+            free(img);
+            return -1;
 #endif
         }
 

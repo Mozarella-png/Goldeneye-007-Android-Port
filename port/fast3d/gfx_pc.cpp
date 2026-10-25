@@ -24,6 +24,7 @@
 #define _LANGUAGE_C
 #endif
 #include <PR/gbi.h>
+#include "portaddr.h"
 #include "gbiex.h" /* GE's G_TRI4 + PD extension opcodes (see header) */
 
 #include "platform.h"
@@ -833,7 +834,7 @@ void gfx_texture_cache_delete_range(const uint8_t* start, const uint8_t* end) {
 // green/pink — the garbled Rareware-logo pixels.
 static bool gfx_tex_source_is_c_array(const uint8_t* addr) {
     const uintptr_t a = (uintptr_t)addr;
-    if (a >= 0x10000000u && a < 0x20000000u) return false; // cart map + sidecar
+    if (a >= (uintptr_t)PORT_CART_BASE && a < (uintptr_t)PORT_CART_BASE + 0x10000000u) return false; // cart map + sidecar
     // V1 dram + KSEG0 mirror: the two mapped views (port/src/dram.c). D441:
     // was `a >= V1 && a < 0x90000000`, which went empty with the arena at
     // 0x90000000 and bswapped every DRAM texture (mirrored texel pairs).

@@ -27,6 +27,7 @@ extern void *malloc(size_t size);
 extern int   snprintf(char *str, size_t maxsize, const char *format, ...);
 
 #include "platform.h"
+#include "portaddr.h"
 #include "system.h"
 #include "fs.h"
 #include "pcmodels.h"
@@ -44,7 +45,7 @@ extern struct fileentry file_resource_table[];
 extern resource_lookup_data_entry resource_lookup_data_array[];
 extern s32 file_entry_max;
 
-#define PCMODES_CART_BASE     0x10000000u
+#define PCMODES_CART_BASE     ((u32)PORT_CART_BASE)
 #define PCMODES_MAX_FILES     1024
 #define PCMODES_NAME_LEN      64
 

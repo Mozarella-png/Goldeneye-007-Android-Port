@@ -16,6 +16,20 @@
 #ifndef PORT_DRAM_K0_BASE
 #define PORT_DRAM_K0_BASE  0x80000000UL  /* KSEG0 mirror of V1 (same pages) */
 #endif
+/* N64 cart base: where romdata.c maps the .z64 and where the romassets_*.s
+ * symbols point. PC keeps the N64 address. Android cannot use it: the ART
+ * heap occupies 0x02000000-0x12000000 in the app process, so the ROM goes at
+ * 0x40000000 instead. Changing this requires the matching romassets file:
+ * port/src/romassets_android_<r>.s is generated for 0x40000000 by
+ * tools_pc/android/rebase_romassets.py. Plain integer (no suffix) so the
+ * assembler files can use it too. */
+#ifndef PORT_CART_BASE
+#if defined(__ANDROID__)
+#define PORT_CART_BASE  0x40000000
+#else
+#define PORT_CART_BASE  0x10000000
+#endif
+#endif
 #ifndef PORT_DRAM_SIZE
 #define PORT_DRAM_SIZE     0x00800000UL  /* 8 MB, like an 8-MB-RAM N64 */
 #endif
