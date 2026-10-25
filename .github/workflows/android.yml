@@ -105,12 +105,24 @@ jobs:
           set -o pipefail
           gradle --no-daemon -PgeBuildPort=true assembleDebug 2>&1 | tee build-port.log
 
+      - name: Full compile report (keep going after errors)
+        if: failure()
+        run: |
+          # Gradle's CMake run stops at the first failing object. Re-run the same
+          # ninja build with -k 0 so every failing file shows up in one log.
+          NINJA="$ANDROID_HOME/cmake/3.22.1/bin/ninja"
+          BUILD_DIR=$(ls -d app/.cxx/Debug/*/arm64-v8a | head -1)
+          "$NINJA" -k 0 -C "$BUILD_DIR" > build-port-full.log 2>&1 || true
+          echo "failed objects: $(grep -c '^FAILED:' build-port-full.log || true)"
+
       - name: Upload build log
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: build-port-log
-          path: build-port.log
+          path: |
+            build-port.log
+            build-port-full.log
           if-no-files-found: warn
 
       - name: Upload APK (only if it built)

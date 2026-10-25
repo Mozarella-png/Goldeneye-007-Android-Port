@@ -92,8 +92,11 @@ if(GE_BUILD_PORT)
   # only with a compiler extension: GCC's -fplan9-extensions (the PC build) or
   # -fms-extensions, which MinGW uses for the same embedding (see the root
   # CMakeLists.txt). Clang does not accept plan9 extensions, so -fms-extensions.
+  # NDK defaults to -Werror=format-security. The decomp passes a game string
+  # (langGet) as a printf format in several places; GCC on the PC build only
+  # warns. Downgrade to a warning for the decomp sources. Behaviour unchanged.
   set_source_files_properties(${GE_GAME_C} ${SRC_PORT} PROPERTIES
-    COMPILE_OPTIONS "-fms-extensions")
+    COMPILE_OPTIONS "-fms-extensions;-Wno-error=format-security")
   # The decomp selects its 64-bit (LP64) layouts with `#if defined(__x86_64__)`
   # (e.g. music.c MUSIC_ALLOCATION_BYTES, objecthandler.c pool sizes). arm64
   # Android is LP64 little-endian with the same struct layout, so define the
