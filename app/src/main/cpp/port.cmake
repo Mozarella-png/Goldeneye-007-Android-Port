@@ -101,7 +101,7 @@ set(SRC_LIBULTRARE_DATA
   src/libultrare/io/vitbl.c
 )
 
-list(PREPEND SRC_LIBULTRARE_DATA "${GE_ROOT}")
+list(TRANSFORM SRC_LIBULTRARE_DATA PREPEND "${GE_ROOT}/")
 
 set(SRC_LIBULTRARE_LIBC
   src/libultrare/libc/xprintf.c
@@ -109,7 +109,7 @@ set(SRC_LIBULTRARE_LIBC
   src/libultra/libc/xldtob.c
 )
 
-list(PREPEND SRC_LIBULTRARE_LIBC "${GE_ROOT}")
+list(TRANSFORM SRC_LIBULTRARE_LIBC PREPEND "${GE_ROOT}/")
 
 set(SRC_ASSETS
   assets/font_chardatae.c
@@ -119,7 +119,7 @@ set(SRC_ASSETS
   assets/rarewarelogo.c
 )
 
-list(PREPEND SRC_ASSETS "${GE_ROOT}")
+list(TRANSFORM SRC_ASSETS PREPEND "${GE_ROOT}/")
 
 set(SRC_ENGINE
   src/init.c
@@ -145,4 +145,4 @@ set(SRC_ENGINE
   src/ramrom.c
 )
 
-list(PREPEND SRC_ENGINE "${GE_ROOT}")
+list(TRANSFORM SRC_ENGINE PREPEND "${GE_ROOT}/")

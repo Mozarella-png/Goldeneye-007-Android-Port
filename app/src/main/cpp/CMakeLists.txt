@@ -37,6 +37,40 @@ if(GE_BUILD_PORT)
     -DVERSION_US -DLANG_US -DREFRESH_NTSC
     -DLEFTOVERDEBUG -DLEFTOVERSPECTRUM -DBUGFIX_R0 -DBYTEMATCH)
 
+  # Template variables the root CMakeLists.txt defines for port/include/*.in.
+  # Values for the PC build come from its own logic; these are the Android
+  # equivalents (NDK sysroot instead of the host gcc).
+  set(TARGET_PLATFORM "${ANDROID_ABI}-android")
+  set(ROMID "ntsc-final")
+  set(VERSION_CODENAME "larkspur")
+  set(GE007_VERSION "0.5.0")
+  set(ORIGIN_URL "https://github.com/jkdansereau/goldeneye-pc-port")
+  execute_process(COMMAND git -C "${GE_ROOT}" rev-parse --short HEAD
+                  OUTPUT_VARIABLE VERSION_HASH OUTPUT_STRIP_TRAILING_WHITESPACE
+                  ERROR_QUIET)
+  if(NOT VERSION_HASH)
+    set(VERSION_HASH "unknown")
+  endif()
+  # Host C headers that the port's hoststdlib/hoststring/... wrappers include.
+  # On Android these come from the NDK sysroot and the clang resource dir.
+  execute_process(COMMAND "${CMAKE_C_COMPILER}" -print-file-name=include
+                  OUTPUT_VARIABLE _GE_CLANG_INC OUTPUT_STRIP_TRAILING_WHITESPACE)
+  set(PORT_HOST_STDDDEF_H "${_GE_CLANG_INC}/stddef.h")
+  set(PORT_HOST_STRING_H  "${CMAKE_SYSROOT}/usr/include/string.h")
+  set(PORT_HOST_SCHED_H   "${CMAKE_SYSROOT}/usr/include/sched.h")
+  set(PORT_HOST_STDLIB_H  "${CMAKE_SYSROOT}/usr/include/stdlib.h")
+  # Real zlib for rzdecomp.c. The NDK sysroot does not ship zlib.h, so CI fetches
+  # the zlib source into app/src/main/cpp/zlib and it builds as a subdirectory.
+  set(GE_ZLIB_SRC "${CMAKE_CURRENT_SOURCE_DIR}/zlib")
+  if(NOT EXISTS "${GE_ZLIB_SRC}/zlib.h")
+    message(FATAL_ERROR "zlib source missing in app/src/main/cpp/zlib (CI fetches zlib v1.3.1 there)")
+  endif()
+  set(ZLIB_BUILD_TESTING OFF CACHE BOOL "" FORCE)
+  add_subdirectory(zlib)
+  set(PORT_REAL_ZLIB_H "${GE_ZLIB_SRC}/zlib.h")
+  set(GE_ZLIB_LIB zlibstatic)
+  set(GE_ZLIB_INCLUDES "${GE_ZLIB_SRC}" "${CMAKE_CURRENT_BINARY_DIR}/zlib")
+
   # Generated from the root CMakeLists.txt: source lists (SRC_GAME, SRC_ENGINE,
   # SRC_ASSETS, SRC_LIBULTRA*, SRC_ROMASSETS, SRC_DRAM_SYMS), add_definitions,
   # add_compile_options, include_directories and the configure_file steps.
@@ -61,7 +95,16 @@ endif()
 add_library(main SHARED ${GE_SOURCES})
 
 target_include_directories(main PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+if(GE_BUILD_PORT)
+  target_include_directories(main PRIVATE ${GE_ZLIB_INCLUDES}
+    ${GE_ROOT}/port/include ${GE_ROOT}/port/fast3d ${GE_ROOT}/include
+    ${CMAKE_CURRENT_BINARY_DIR}/port/include)
+endif()
 
 # OpenGL ES 3 instead of desktop GL. The port's renderer (port/fast3d/
 # gfx_opengl.cpp) still needs its GLES backend; see ANDROID-README.md.
-target_link_libraries(main PRIVATE SDL2 GLESv3 EGL log android m z)
+if(GE_BUILD_PORT)
+  target_link_libraries(main PRIVATE SDL2 GLESv3 EGL log android m ${GE_ZLIB_LIB})
+else()
+  target_link_libraries(main PRIVATE SDL2 GLESv3 EGL log android m z)
+endif()

@@ -90,6 +90,12 @@ jobs:
           mkdir -p app/src/main/java/org/libsdl/app
           cp app/src/main/cpp/SDL/android-project/app/src/main/java/org/libsdl/app/*.java app/src/main/java/org/libsdl/app/
 
+      - name: Fetch zlib 1.3.1 (real zlib for the port)
+        run: |
+          curl -fsSL "https://github.com/madler/zlib/archive/refs/tags/v1.3.1.tar.gz" -o zlib.tar.gz
+          tar -xzf zlib.tar.gz
+          mv zlib-1.3.1 app/src/main/cpp/zlib
+
       - name: Regenerate port CMake from the PC build
         run: python3 tools_pc/android/gen_port_cmake.py
 
