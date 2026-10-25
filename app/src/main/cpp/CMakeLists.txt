@@ -107,19 +107,23 @@ if(GE_BUILD_PORT)
     $<$<COMPILE_LANGUAGE:C>:-include;versioninfo.h>
     # libc comes from bionic first. The decomp's headers come after the system
     # headers, so <limits.h>, <stdlib.h>, <string.h>, <stddef.h> are bionic's.
-    -idirafter "${GE_ROOT}/port/shim"
-    -idirafter "${GE_ROOT}/include")
+    # One token per flag (-idirafter<dir>): CMake drops a repeated
+    # "-idirafter" token, which left PR/ultratypes.h and ultra64.h unfound.
+    -idirafter${GE_ROOT}/port/shim
+    -idirafter${GE_ROOT}/include
+    -idirafter${GE_ROOT}/src
+    -idirafter${GE_ROOT}/src/game
+    -idirafter${GE_ROOT}/src/libultra
+    -idirafter${GE_ROOT}/src/libultra/audio)
   target_include_directories(main PRIVATE
     "${GE_BIN}/ge-port-core"
     "${GE_ROOT}/port/include"
     "${GE_ROOT}"
-    "${GE_ROOT}/src"
-    "${GE_ROOT}/src/game"
-    "${GE_ROOT}/src/libultra"
-    "${GE_ROOT}/src/libultra/audio"
     "${GE_BIN}/port/include"
     "${GE_ROOT}/port/fast3d"
     ${GE_ZLIB_INCLUDES})
+  # src/ is on the path only with -idirafter (above). As -I it shadowed the
+  # system <sched.h> that pthread.h includes (src/sched.h, the game scheduler).
 endif()
 
 target_include_directories(main PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

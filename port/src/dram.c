@@ -56,6 +56,24 @@
 #define _GNU_SOURCE /* memfd_create — must precede all system headers */
 #include <sys/mman.h>
 #include <unistd.h>
+#if defined(__ANDROID__) && __ANDROID_API__ < 30
+/* The NDK declares memfd_create() only from API 30 and this app runs on 26+.
+ * The kernel has had the syscall since 3.17, so call it directly. */
+#include <errno.h>
+#include <sys/syscall.h>
+static int geMemfdCreate(const char *name, unsigned int flags)
+{
+#ifdef __NR_memfd_create
+    return (int)syscall(__NR_memfd_create, name, flags);
+#else
+    (void)name;
+    (void)flags;
+    errno = ENOSYS;
+    return -1;
+#endif
+}
+#define memfd_create geMemfdCreate
+#endif
 #endif
 
 #define DRAM_V1_BASE   PORT_DRAM_V1_BASE /* s32-safe "virtual" view (portaddr.h) */
