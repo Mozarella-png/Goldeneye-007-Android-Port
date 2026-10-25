@@ -41,7 +41,7 @@ Por defecto, el CMake de Android solo compila el módulo táctil y SDL. Para inc
 
 `port.cmake` no se escribe a mano: `gen_port_cmake.py` copia del `CMakeLists.txt` raíz las listas de fuentes, definiciones, includes y `configure_file`. Así el build de Android sigue al de PC sin duplicar la lista.
 
-En CI, el job `build-port-apk` hace eso mismo y no bloquea el resto. Sube `build-port-log` con el log completo del build, y el APK solo si compila.
+En CI, el job `build-port-apk` hace eso mismo y no bloquea el resto. El workflow `android.yml` se ejecuta en cada push a `main` y en cada PR, y también puede lanzarse a mano desde la pestaña Actions. `ci.yml` es solo manual. Sube `build-port-log` con el log completo del build, y el APK solo si compila.
 
 ## Pendientes, en orden
 

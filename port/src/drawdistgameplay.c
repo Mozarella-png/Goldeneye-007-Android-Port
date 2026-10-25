@@ -24,6 +24,9 @@
 #include "port_math.h"
 #include "drawdistgameplay.h"
 
+/* Defined in src/game/bg.c (game file, left untouched); no header declares it. */
+extern u8 getROOMID_isNeighborToRendered(s32 roomID);
+
 extern f32 portDrawDistanceMultiplier(void);
 
 static u8 s_authRendered[MAXROOMCOUNT];

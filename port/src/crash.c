@@ -351,7 +351,13 @@ static LONG __stdcall crashHandler(PEXCEPTION_POINTERS exinfo)
 
 #include <ucontext.h>
 #include <signal.h>
+#if defined(__ANDROID__)
+/* bionic has no <execinfo.h>: symbolized crash traces are unavailable on Android. */
+static int backtrace(void **buf, int size) { (void)buf; (void)size; return 0; }
+static char **backtrace_symbols(void *const *buf, int size) { (void)buf; (void)size; return NULL; }
+#else
 #include <execinfo.h>
+#endif
 #include <unistd.h>
 #include <ctype.h>
 #include <dlfcn.h>

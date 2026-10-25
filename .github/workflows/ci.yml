@@ -1,21 +1,10 @@
 name: CI
 
+# Manual only. Start it from the Actions tab (Run workflow) or with:
+#   gh workflow run ci.yml
+# It no longer runs on push, pull request or tag. Previously a queued
+# self-hosted Windows job could sit for hours and burn Actions time.
 on:
-  push:
-    branches: [ main, master ]
-    tags: [ 'v*' ]
-    # No paths-ignore here: tag pushes must always build so a release can be
-    # cut even when the tagged commit only touched docs, and a workflow that
-    # never triggers would leave a required status check pending forever.
-    # Docs-only branch pushes are instead skipped by the `changes` job below,
-    # which reports the build jobs as "skipped" (green for branch protection).
-  pull_request:
-    # No paths-ignore here either: a docs-only PR must still trigger the
-    # workflow so the required checks report a status. The `changes` job
-    # below diffs the PR against its base and, for a docs-only PR, reports
-    # the build jobs as "skipped" — which branch protection accepts as
-    # success. With paths-ignore the workflow never ran and the required
-    # checks stayed "expected" forever, wedging every docs PR (M-44).
   workflow_dispatch:
 
 # Minimal token: CI only reads the repo and uploads build artifacts, neither of
@@ -64,6 +53,7 @@ jobs:
   # builds always run. Docs globs: **.md, docs/**, LICENSE, NOTICE.
   changes:
     runs-on: ubuntu-22.04
+    timeout-minutes: 10
     outputs:
       code: ${{ steps.filter.outputs.code }}
       # Windows builds default to the self-hosted box (fast, local ccache;
@@ -119,6 +109,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-22.04
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -182,6 +173,7 @@ jobs:
   # get-pip.py: Debian 11's security archive no longer serves python3-pip.
   linux-build:
     runs-on: ubuntu-24.04
+    timeout-minutes: 60
     container:
       image: registry.gitlab.steamos.cloud/steamrt/sniper/sdk:3.0.20260805.254768@sha256:1c33c507bc75d012e77df5727f93b0d5b8c3f7c8d4142ba5f7a16882cc92e014
     # A container job's default `run` shell is sh, not bash (the packaging
@@ -308,6 +300,7 @@ jobs:
     # release (tag) build or a fork PR — see the `changes` job's `runner`
     # step for the exact rule (docs/dev/notes/SELFHOSTED-RUNNER-PLAN.md §G2).
     runs-on: ${{ needs.changes.outputs.windows_selfhosted == 'true' && fromJSON('["self-hosted", "windows"]') || 'windows-latest' }}
+    timeout-minutes: 90
     defaults:
       run:
         shell: msys2 {0}
@@ -426,6 +419,7 @@ jobs:
     if: github.ref_type == 'tag'
     needs: [ changes, validate, windows-build, linux-build ]
     runs-on: ubuntu-22.04
+    timeout-minutes: 30
     permissions:
       contents: write
       id-token: write

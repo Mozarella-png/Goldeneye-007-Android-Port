@@ -51,7 +51,8 @@ void assert();
  * winsock has not already declared them, so TUs that include <windows.h>
  * before <ultra64.h> don't get a dllimport redeclaration warning. Defined in
  * port/src/pc_netorder.c (little-endian byte swap == CharArrayTo16/32). */
-#if !defined(__WINSOCK_H) && !defined(_WINSOCK2_H)
+/* Android (bionic) declares ntohs/ntohl itself in sys/endian.h. */
+#if !defined(__WINSOCK_H) && !defined(_WINSOCK2_H) && !defined(__ANDROID__)
 /* Match winsock's own signatures (u_short/u_long) so TUs that parse
  * <windows.h> later redeclare compatibly; on LLP64 u_long is 64-bit and the
  * high bits are unused for the 16/32-bit values game code passes. */
@@ -329,7 +330,9 @@ void * memaAlloc();
 void memaFree();
 s32 memaGetLongestFree();
 int memcmp();
+#ifndef __ANDROID__ /* bionic's <string.h> declares these (overloadable) */
 void * memcpy();
+#endif
 u32 modelFindNextProjectileHitCandidate();
 void modelGetXYExtents();
 s32 modelLoad();
@@ -412,11 +415,19 @@ bool stanTileHasZeroArea();
 void stop_recording_ramrom();
 void store_favorite_weapon_current_player();
 void store_osgetcount();
+#ifndef __ANDROID__
 char * strcat();
+#endif
 int strcmp();
+#ifndef __ANDROID__
 char * strcpy();
+#endif
+#ifndef __ANDROID__
 size_t strlen();
+#endif
+#ifndef __ANDROID__
 char * strncpy();
+#endif
 long int strtol();
 void sub_GAME_7F008DE4();
 s32 sub_GAME_7F03DB70();

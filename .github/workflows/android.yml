@@ -1,5 +1,6 @@
 name: Android APK
 
+# Runs on pushes to main, on pull requests, and on demand from the Actions tab.
 on:
   push:
     branches: [main]
@@ -14,6 +15,7 @@ jobs:
   touch-tests:
     name: Touch layout unit tests (Linux)
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
       - name: Build and run tests
@@ -26,6 +28,7 @@ jobs:
     name: Build debug APK
     needs: touch-tests
     runs-on: ubuntu-24.04
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v5
 
@@ -66,6 +69,7 @@ jobs:
     name: Build APK with the port (experimental, non-blocking)
     needs: touch-tests
     runs-on: ubuntu-24.04
+    timeout-minutes: 60
     continue-on-error: true
     steps:
       - uses: actions/checkout@v5

@@ -1103,6 +1103,8 @@ s32 osContReset(OSMesgQueue *mq, OSContStatus *status)
 static u8   s_eeprom[GE_EEP_SIZE];
 static int  s_eepromLoaded = 0;
 
+extern int geEepImportEmulatorSave(const char *path); /* port/src/eepimport.c (D514) */
+
 static void geEepromLoad(void)
 {
     if (s_eepromLoaded) return;
