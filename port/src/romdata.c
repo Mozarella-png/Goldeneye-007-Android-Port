@@ -17,6 +17,7 @@
  * generated symbols already carry the layout.
  */
 
+#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -427,6 +428,26 @@ int romdataInit(void)
             sysLogPrintf(LOG_WARNING, "romdataInit: could not map 0x%08X "
                          "(ASLR/kernel refused the fixed address); using heap "
                          "copy — direct ROM reads will fail", CART_BASE);
+            sysLogPrintf(LOG_WARNING, "romdataInit: mmap %s, errno %d (%s)",
+                         at == MAP_FAILED ? "failed" : "returned another address",
+                         errno, strerror(errno));
+            /* Show what already occupies the low address range, so the
+             * cause (a loaded library, the heap, a reservation) is visible. */
+            {
+                FILE *maps = fopen("/proc/self/maps", "r");
+                if (maps) {
+                    char line[256];
+                    while (fgets(line, sizeof(line), maps)) {
+                        unsigned long lo = 0, hi = 0;
+                        if (sscanf(line, "%lx-%lx", &lo, &hi) == 2 &&
+                            hi > CART_BASE && lo < (unsigned long)CART_BASE + maplen) {
+                            line[strcspn(line, "\n")] = 0;
+                            sysLogPrintf(LOG_WARNING, "romdataInit: occupied: %s", line);
+                        }
+                    }
+                    fclose(maps);
+                }
+            }
 #endif
         }
 
