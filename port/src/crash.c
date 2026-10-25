@@ -381,7 +381,16 @@ static void crashStackTrace(char *msg, int sig, void *pc, ucontext_t *ucontext, 
 
     const int nframes = backtrace(frames, CRASH_MAX_FRAMES);
     if (nframes <= 0) {
+        /* No symbolized frames (always the case on Android, where backtrace is
+         * a stub). Still report the signal, fault address and PC: they are
+         * what makes a native crash diagnosable. */
         CRASH_MSG("no information\n");
+        CRASH_MSG("SIGNAL: %d\n", sig);
+        if (siginfo && (sig == SIGSEGV || sig == SIGBUS)) {
+            CRASH_MSG("FAULT ADDR: %p\n", (void *)siginfo->si_addr);
+        }
+        CRASH_MSG("PC: %p\n", pc);
+        CRASH_MSG("MODULE: %p\n", pc ? crashGetModuleBase(pc) : NULL);
         return;
     }
 
