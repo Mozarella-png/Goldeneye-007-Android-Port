@@ -17,7 +17,6 @@
  * generated symbols already carry the layout.
  */
 
-#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -53,6 +52,9 @@ extern int snprintf(char *str, size_t maxsize, const char *format, ...);
 #include "bondtypes.h"
 
 #define CART_BASE   0x10000000u
+
+int portLastErrno(void);            /* errnostr.c */
+const char *portLastErrnoText(void);  /* errnostr.c */
 
 static u8  *rom = NULL;        /* heap copy (fallback path) */
 static u32  romSize = 0;
@@ -430,7 +432,7 @@ int romdataInit(void)
                          "copy — direct ROM reads will fail", CART_BASE);
             sysLogPrintf(LOG_WARNING, "romdataInit: mmap %s, errno %d (%s)",
                          at == MAP_FAILED ? "failed" : "returned another address",
-                         errno, strerror(errno));
+                         portLastErrno(), portLastErrnoText());
             /* Show what already occupies the low address range, so the
              * cause (a loaded library, the heap, a reservation) is visible. */
             {
