@@ -17,7 +17,8 @@ android {
 
         externalNativeBuild {
             cmake {
-                arguments '-DANDROID_STL=c++_shared', '-DANDROID_ARM_NEON=TRUE'
+                arguments '-DANDROID_STL=c++_shared', '-DANDROID_ARM_NEON=TRUE',
+                          "-DGE_BUILD_PORT=${project.findProperty('geBuildPort') ?: 'OFF'}"
                 cppFlags '-std=c++20'
             }
         }

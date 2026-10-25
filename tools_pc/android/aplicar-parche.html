@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aplicar parche: GoldenEye 007 Android</title>
+<style>
+ body{font-family:system-ui,sans-serif;max-width:760px;margin:2rem auto;padding:0 1rem;line-height:1.5;color:#1d1d1f}
+ h1{font-size:1.4rem} code,pre{background:#f3f3f5;border-radius:6px}
+ pre{padding:.8rem;overflow:auto;font-size:.8rem}
+ button{font-size:1rem;padding:.6rem 1.1rem;border-radius:8px;border:0;background:#1d4ed8;color:#fff;cursor:pointer;margin-right:.5rem}
+ button:disabled{background:#9ca3af}
+ .ok{color:#15803d;font-weight:600} .err{color:#b91c1c;font-weight:600}
+ .box{border:1px solid #e5e7eb;border-radius:10px;padding:1rem;margin:1rem 0}
+</style></head><body>
+<h1>Aplicar el parche Android a <code>port/src/main.c</code></h1>
+<p>Esta página aplica el cambio en tu navegador. No sube nada a ningún servidor: el archivo se procesa localmente.</p>
+
+<div class="box">
+<p><strong>1.</strong> Sube el archivo <code>port/src/main.c</code> de tu repo del port (el original, sin cambios):</p>
+<input type="file" id="src" accept=".c">
+</div>
+
+<div class="box">
+<p><strong>2.</strong> Aplica el parche:</p>
+<button id="apply" disabled>Aplicar parche</button>
+<button id="dl" disabled>Descargar main.c parcheado</button>
+<p id="status"></p>
+</div>
+
+<div class="box">
+<p><strong>Alternativa en terminal</strong> (desde la raíz del repo del port):</p>
+<pre>git apply --check main-android.patch   # comprobar sin tocar nada
+git apply main-android.patch           # aplicar
+# o, sin git:
+patch -p1 &lt; main-android.patch</pre>
+</div>
+
+<details><summary>Ver el parche completo</summary>
+<pre id="patchtext"></pre>
+</details>
+
+<script>
+// Minimal unified-diff applier for a single file (one or more hunks).
+// Returns { ok, text, error }. Hunks are located by their context, so the
+// patch still applies if the file moved a few lines (like patch(1) does).
+function applyUnifiedPatch(original, patchText) {
+  const src = original.replace(/\r\n/g, "\n").split("\n");
+  const trailingNewline = original.endsWith("\n");
+  const lines = patchText.replace(/\r\n/g, "\n").split("\n");
+
+  // Collect hunks
+  const hunks = [];
+  let cur = null;
+  for (const raw of lines) {
+    if (raw.startsWith("@@")) {
+      const m = /^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@/.exec(raw);
+      if (!m) return { ok: false, error: "Cabecera de hunk inválida: " + raw };
+      cur = { oldStart: parseInt(m[1], 10), body: [] };
+      hunks.push(cur);
+    } else if (cur && (raw.startsWith(" ") || raw.startsWith("-") || raw.startsWith("+") || raw === "")) {
+      if (raw === "" && cur.body.length === 0) continue;
+      cur.body.push(raw);
+    }
+    // ignore ---/+++ headers and "\ No newline" markers
+  }
+  if (hunks.length === 0) return { ok: false, error: "El parche no contiene hunks (@@)." };
+
+  let out = src.slice();
+  let offset = 0;
+  for (const h of hunks) {
+    const oldLines = [];
+    const newLines = [];
+    for (const l of h.body) {
+      const tag = l.charAt(0);
+      const text = l.slice(1);
+      if (tag === " " || l === "") { oldLines.push(text); newLines.push(text); }
+      else if (tag === "-") oldLines.push(text);
+      else if (tag === "+") newLines.push(text);
+    }
+    // Find the block, starting near the expected position, searching outward.
+    const expected = h.oldStart - 1 + offset;
+    let at = -1;
+    for (let d = 0; d <= out.length && at < 0; d++) {
+      for (const pos of [expected + d, expected - d]) {
+        if (pos < 0 || pos + oldLines.length > out.length) continue;
+        let match = true;
+        for (let i = 0; i < oldLines.length; i++) {
+          if (out[pos + i] !== oldLines[i]) { match = false; break; }
+        }
+        if (match) { at = pos; break; }
+      }
+    }
+    if (at < 0) {
+      return { ok: false, error: "Un hunk no encaja con este archivo (¿es otra versión de main.c?). Hunk que empieza en la línea " + h.oldStart + "." };
+    }
+    out.splice(at, oldLines.length, ...newLines);
+    offset = at - (h.oldStart - 1) + newLines.length - oldLines.length + offset;
+  }
+  let text = out.join("\n");
+  if (trailingNewline && !text.endsWith("\n")) text += "\n";
+  return { ok: true, text };
+}
+if (typeof module !== "undefined") module.exports = { applyUnifiedPatch };
+
+const PATCH = "--- a/port/src/main.c\n+++ b/port/src/main.c\n@@ -21,6 +21,13 @@\n #include <PR/ultratypes.h>\n #include <PR/os.h>\n \n+#if defined(__ANDROID__)\n+#include <SDL.h>\n+#include <SDL_system.h>   /* SDL_AndroidGetExternalStoragePath */\n+#include <sys/stat.h>\n+#include <unistd.h>\n+#endif\n+\n #include \"platform.h\"\n #include \"system.h\"\n #include \"config.h\"\n@@ -123,7 +130,7 @@\n #endif\n }\n \n-int main(int argc, char **argv)\n+static int portMain(int argc, char **argv)\n {\n     sysSetArgs(argc, argv);\n \n@@ -279,3 +286,26 @@\n \n     return 0;\n }\n+\n+#if defined(__ANDROID__)\n+/* SDLActivity resolves SDL_main in libmain.so and calls it on the native\n+ * thread. Switch the working directory to the app's external files dir so\n+ * every existing data/-relative path (ROM, ge007.ini, ge007.eep, sidecars)\n+ * works unchanged. The ROM goes in <files>/data/ge007.ntsc-final.z64. */\n+int SDL_main(int argc, char **argv)\n+{\n+    const char *base = SDL_AndroidGetExternalStoragePath();\n+    if (base && chdir(base) == 0) {\n+        mkdir(\"data\", 0775);  /* best effort; ignored if it exists */\n+    } else {\n+        sysLogPrintf(LOG_ERROR, \"Android: could not enter the app data dir (%s)\",\n+                     base ? base : \"(null)\");\n+    }\n+    return portMain(argc, argv);\n+}\n+#else\n+int main(int argc, char **argv)\n+{\n+    return portMain(argc, argv);\n+}\n+#endif\n";
+document.getElementById("patchtext").textContent = PATCH;
+
+let result = null;
+const status = document.getElementById("status");
+const src = document.getElementById("src");
+const applyBtn = document.getElementById("apply");
+const dlBtn = document.getElementById("dl");
+
+src.addEventListener("change", () => {
+  applyBtn.disabled = !src.files.length;
+  dlBtn.disabled = true; result = null; status.textContent = "";
+});
+
+applyBtn.addEventListener("click", async () => {
+  const file = src.files[0];
+  const text = await file.text();
+  const r = applyUnifiedPatch(text, PATCH);
+  if (!r.ok) {
+    result = null; dlBtn.disabled = true;
+    status.innerHTML = '<span class="err">No se pudo aplicar: ' + r.error + '</span>';
+    return;
+  }
+  result = r.text;
+  dlBtn.disabled = false;
+  status.innerHTML = '<span class="ok">Parche aplicado. Descarga el archivo y reemplaza port/src/main.c.</span>';
+});
+
+dlBtn.addEventListener("click", () => {
+  const blob = new Blob([result], { type: "text/x-csrc" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "main.c";
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+</script>
+</body></html>

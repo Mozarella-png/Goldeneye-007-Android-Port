@@ -1,0 +1,116 @@
+# GoldenEye 007 PC Port - @VERSION@
+
+A native PC port of the original Nintendo 64 *GoldenEye 007*, compiled from the
+[GoldenEye 007 decompilation](https://github.com/n64decomp/007). No emulator.
+
+The full single-player campaign runs at a steady 60 fps, and 2-4 player
+split-screen multiplayer works on every multiplayer map. This is a pre-1.0
+release: the known issues are listed at
+<https://github.com/jkdansereau/goldeneye-pc-port/blob/main/docs/ROADMAP.md#known-issues>.
+Feedback is very welcome.
+
+Project & source: <https://github.com/jkdansereau/goldeneye-pc-port>
+
+This is the **@PLATFORM@** build. The executable is `@EXE@`.
+
+---
+
+## 1. You must supply your own ROM
+
+This package contains **no Nintendo code and no game data**. You need a
+*GoldenEye 007* Nintendo 64 ROM that **you legally own**, US (NTSC-U)
+version, big-endian `.z64`:
+
+| Region | ROM filename | SHA-1 |
+|---|---|---|
+| NTSC-U (US) | `ge007.ntsc-final.z64` | `abe01e4aeb033b6c0836819f549c791b26cfde83` |
+
+PAL (EU) and JP ROMs are not supported by this package yet.
+
+To check your file: on Windows, `certutil -hashfile ge007.ntsc-final.z64 SHA1`;
+on Linux, `sha1sum ge007.ntsc-final.z64`.
+
+@DEPS@
+## 2. Set up (one time)
+
+1. Unpack this folder anywhere (on Windows, not inside the zip).
+2. Make a `data` folder next to `@EXE@`.
+3. Copy your ROM into it, named exactly: `data/ge007.ntsc-final.z64`
+
+That's all. On first launch the game generates its asset files from the ROM
+(`data/pcmodels-ntsc-final/` and `data/pccg-ntsc-final/`); that first run
+takes a few extra seconds. No Python, no compiler, nothing to install. If
+you replace the ROM later, delete those two folders and they are made again.
+
+## 3. Run
+
+Run `@EXE@` **from this folder**. On Windows, SmartScreen may say "Windows
+protected your PC" because the exe is not code-signed: click **More info**,
+then **Run anyway**.
+
+> If the game exits right away reporting missing data, run the generator
+> yourself from this folder (`prepare-assets/ge007-convert`; on Windows,
+> `prepare-assets\ge007-convert.exe`). On success it prints one line per pass
+> and ends with `prepare-assets: done.`
+
+## 4. Controls (defaults)
+
+| Action | Keyboard / mouse | Controller |
+|---|---|---|
+| Move / strafe | `W` `A` `S` `D` | Left stick (or D-pad) |
+| Move / turn | Arrow keys | - |
+| Aim / look | Mouse | Right stick |
+| Fire | Left mouse | Right trigger |
+| Aim mode | Right mouse / `LShift` | Left trigger / LB |
+| Use / interact | `E` | A |
+| Reload | `R` | X |
+| Crouch | `LCtrl` | Left or right stick click |
+| Cycle owned gadgets | Watch inventory | B |
+| Next weapon | Mouse wheel down / `Q` | Y |
+| Previous weapon | Mouse wheel up | - |
+| Start | `Enter` / `Tab` | Start |
+| Options overlay | `F10` | Select |
+
+Everything is rebindable in the options overlay: *Input -> Bindings...* for
+keyboard and mouse, *Input -> Controller* for each controller.
+
+**Split-screen:** pick Multiplayer from the main menu. With one controller,
+keyboard/mouse is player 1 and the controller is player 2; with two or more
+controllers, the controllers take players 1-4.
+
+@DECK@
+## 5. Your files
+
+Everything stays inside this folder; nothing is written anywhere else.
+
+| File | What it is |
+|---|---|
+| `data/ge007.eep` | Your game progress. Copy it somewhere safe (with the game closed) to back it up. |
+| `tools/eep_convert.py` | Converts a save from an N64 emulator (1964, Project64, ...) to this port, or back: `python tools/eep_convert.py n64-to-pc my-save.eep data/ge007.eep`. A straight copy of an emulator save is wiped on first launch. Needs Python 3; back up `data/ge007.eep` first. |
+| `data/ge007.ini` | Your settings. |
+| `data/pcmodels-*/`, `data/pccg-*/`, `data/ge007.shaders` | Generated files. Safe to delete; they are made again. |
+| `ge007.crash.log` | Written in the folder you launched from if the game crashes. |
+
+## 6. Updating to a newer version
+
+Unpack the new version into a new folder, then copy your ROM, `ge007.eep`
+and `ge007.ini` into its `data` folder. Don't copy the generated
+`pcmodels-*` / `pccg-*` folders: the new version makes its own.
+
+## 7. Problems?
+
+- **Black screen or no window:** update your graphics driver (OpenGL 3.0 is
+  needed).
+- **The game crashes:** open an issue at
+  <https://github.com/jkdansereau/goldeneye-pc-port/issues> and attach
+  `ge007.crash.log`, the output of `@EXE@ --version`, your OS, your GPU and
+  your ROM's SHA-1. **Never attach the ROM itself.**
+
+## 8. Legal
+
+Non-commercial fan preservation / research project. **Not** affiliated with,
+endorsed by, or sponsored by Nintendo, Rare, Microsoft, MGM, Danjaq, or EON
+Productions. No ROM, game assets, or official logos are distributed.
+
+See `licenses/` for the port's MIT license, the upstream project `NOTICE`, and
+the third-party library licenses (SDL2, zlib@LICENSE_EXTRA@).

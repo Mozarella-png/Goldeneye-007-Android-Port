@@ -12,29 +12,37 @@ set(SDL_SHARED ON CACHE BOOL "" FORCE)
 set(SDL_STATIC OFF CACHE BOOL "" FORCE)
 add_subdirectory(SDL)
 
-# Port layer, touch overlay and shared headers.
-# TODO(port): game sources (src/game, src/libultra, rsp-free engine files) are
-# listed in the root CMakeLists.txt as SRC_GAME / SRC_ENGINE / SRC_LIBULTRA*.
-# They must be exported to a shared include so both builds use one list.
-# Until then this target only compiles the layers below.
-file(GLOB PORT_C   "${CMAKE_CURRENT_SOURCE_DIR}/../../../../port/src/*.c")
-file(GLOB PORT_CXX "${CMAKE_CURRENT_SOURCE_DIR}/../../../../port/src/*.cpp"
-                   "${CMAKE_CURRENT_SOURCE_DIR}/../../../../port/fast3d/*.cpp")
+# Repo root is four levels up from this file (app/src/main/cpp).
+set(GE_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../../../..")
 
-add_library(main SHARED
+# GE_BUILD_PORT=OFF (default): only the touch layer and SDL are compiled. This
+# is the state CI verifies. Turn ON once the game sources are wired in (see
+# ANDROID-README.md, step "Fuentes del juego"); it adds port/ to the build.
+option(GE_BUILD_PORT "Compile the GoldenEye port sources (port/)" OFF)
+
+set(GE_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/touch_layout.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/android_main.cpp
-    ${PORT_C}
-    ${PORT_CXX}
 )
 
-target_include_directories(main PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../../../port/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../../../port/fast3d
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../../../include
-)
+if(GE_BUILD_PORT)
+  file(GLOB GE_PORT_C   "${GE_ROOT}/port/src/*.c")
+  file(GLOB GE_PORT_CXX "${GE_ROOT}/port/src/*.cpp"
+                        "${GE_ROOT}/port/fast3d/*.cpp")
+  list(APPEND GE_SOURCES ${GE_PORT_C} ${GE_PORT_CXX})
+  message(STATUS "GE_BUILD_PORT=ON: compiling port sources from ${GE_ROOT}/port")
+endif()
 
-# OpenGL ES 3 instead of desktop GL (see docs/android.md: the renderer still needs
-# its GLES backend; this line only links the library).
+add_library(main SHARED ${GE_SOURCES})
+
+target_include_directories(main PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+if(GE_BUILD_PORT)
+  target_include_directories(main PRIVATE
+    ${GE_ROOT}/port/include
+    ${GE_ROOT}/port/fast3d
+    ${GE_ROOT}/include
+  )
+endif()
+
+# OpenGL ES 3 instead of desktop GL. The renderer still needs its GLES backend
+# (see ANDROID-README.md); this line only links the library.
 target_link_libraries(main PRIVATE SDL2 GLESv3 EGL log android m z)

@@ -1,0 +1,52 @@
+--- a/port/src/main.c
++++ b/port/src/main.c
+@@ -21,6 +21,13 @@
+ #include <PR/ultratypes.h>
+ #include <PR/os.h>
+ 
++#if defined(__ANDROID__)
++#include <SDL.h>
++#include <SDL_system.h>   /* SDL_AndroidGetExternalStoragePath */
++#include <sys/stat.h>
++#include <unistd.h>
++#endif
++
+ #include "platform.h"
+ #include "system.h"
+ #include "config.h"
+@@ -123,7 +130,7 @@
+ #endif
+ }
+ 
+-int main(int argc, char **argv)
++static int portMain(int argc, char **argv)
+ {
+     sysSetArgs(argc, argv);
+ 
+@@ -279,3 +286,26 @@
+ 
+     return 0;
+ }
++
++#if defined(__ANDROID__)
++/* SDLActivity resolves SDL_main in libmain.so and calls it on the native
++ * thread. Switch the working directory to the app's external files dir so
++ * every existing data/-relative path (ROM, ge007.ini, ge007.eep, sidecars)
++ * works unchanged. The ROM goes in <files>/data/ge007.ntsc-final.z64. */
++int SDL_main(int argc, char **argv)
++{
++    const char *base = SDL_AndroidGetExternalStoragePath();
++    if (base && chdir(base) == 0) {
++        mkdir("data", 0775);  /* best effort; ignored if it exists */
++    } else {
++        sysLogPrintf(LOG_ERROR, "Android: could not enter the app data dir (%s)",
++                     base ? base : "(null)");
++    }
++    return portMain(argc, argv);
++}
++#else
++int main(int argc, char **argv)
++{
++    return portMain(argc, argv);
++}
++#endif
