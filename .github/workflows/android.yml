@@ -61,7 +61,7 @@ jobs:
           gradle --no-daemon assembleDebug
 
       - name: Upload APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: Goldeneye007-debug
           path: app/build/outputs/apk/debug/*.apk
@@ -123,7 +123,7 @@ jobs:
 
       - name: Upload unstripped native libs (for crash symbolization)
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: port-native-symbols
           path: app/build/intermediates/cxx/Debug/*/obj/*/*.so
@@ -132,7 +132,7 @@ jobs:
 
       - name: Upload build log
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: build-port-log
           path: |
@@ -142,7 +142,7 @@ jobs:
 
       - name: Upload APK (only if it built)
         if: success()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: Goldeneye007-port-debug
           path: app/build/outputs/apk/debug/*.apk
